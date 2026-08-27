@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="SkyHunter AI — Premium flight search with AI price prediction">
+<meta name="description" content="SkyHunter AI — Premium AI flight search with interactive map">
 <meta name="theme-color" content="#6366f1">
-<title>SkyHunter AI — Premium Flight Search</title>
+<title>SkyHunter AI — Premium Flight Search v9.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -81,6 +81,7 @@ body {
 @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes toastIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 /* ═══════════════════════════════════════════════════════════════
    HEADER
@@ -233,7 +234,7 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   LOCATION SELECTOR (NEW!)
+   LOCATION SELECTOR WITH AUTOCOMPLETE
    ═══════════════════════════════════════════════════════════════ */
 .location-section { padding: 0 0 32px; }
 .location-card {
@@ -294,6 +295,45 @@ body {
 }
 .geo-btn:hover { background: var(--accent-gradient); color: white; }
 .geo-btn.loading { animation: spin 1s linear infinite; }
+
+/* AUTOCOMPLETE FOR LOCATION */
+.location-autocomplete {
+  position: absolute; top: 100%; left: 0; right: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  max-height: 320px; overflow-y: auto;
+  z-index: 100; box-shadow: var(--shadow-xl);
+  display: none;
+  margin-top: 4px;
+}
+.location-autocomplete.show { display: block; animation: scaleIn 0.2s var(--transition-base); }
+.location-autocomplete-item {
+  padding: 12px 16px; cursor: pointer;
+  border-bottom: 1px solid var(--border-primary);
+  display: flex; align-items: center; gap: 12px;
+  transition: background var(--transition-fast);
+}
+.location-autocomplete-item:hover { background: var(--bg-secondary); }
+.location-autocomplete-item:last-child { border-bottom: none; }
+.loc-ac-icon {
+  width: 36px; height: 36px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.loc-ac-info { flex: 1; }
+.loc-ac-name { font-weight: 600; color: var(--text-primary); font-size: 14px; }
+.loc-ac-country { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.loc-ac-highlight {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
 .radius-wrap { display: flex; flex-direction: column; gap: 8px; }
 .radius-label {
   font-size: 12px; font-weight: 600;
@@ -353,7 +393,7 @@ body {
 }
 .airport-chip-new {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 12px;
+  padding: 8px 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-full);
@@ -368,6 +408,7 @@ body {
 .airport-chip-new.selected {
   background: var(--accent-gradient);
   color: white; border-color: transparent;
+  box-shadow: var(--shadow-md);
 }
 .airport-chip-distance {
   font-family: var(--font-mono);
@@ -375,7 +416,7 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SEARCH FORM (GLASSMORPHISM)
+   SEARCH FORM
    ═══════════════════════════════════════════════════════════════ */
 .search-section { padding: 0 0 32px; }
 .search-card {
@@ -420,6 +461,93 @@ body {
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 4px rgba(99,102,241,0.1);
 }
+.from-display {
+  padding: 12px 14px;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: 14px; color: var(--text-primary);
+  font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+  min-height: 44px;
+}
+.from-airport-code {
+  padding: 2px 8px;
+  background: var(--accent-gradient);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* CHILDREN BLOCK */
+.children-block {
+  grid-column: 1 / -1;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+}
+.children-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px;
+}
+.children-title {
+  font-size: 13px; font-weight: 700;
+  color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.children-count {
+  display: flex; align-items: center; gap: 8px;
+}
+.children-count-btn {
+  width: 28px; height: 28px;
+  background: var(--accent-gradient);
+  color: white; border: none;
+  border-radius: 50%;
+  font-size: 16px; font-weight: 700;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+.children-count-btn:hover { transform: scale(1.1); }
+.children-count-value {
+  font-family: var(--font-mono);
+  font-weight: 700; font-size: 16px;
+  min-width: 24px; text-align: center;
+}
+.children-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+.child-item {
+  padding: 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+}
+.child-item-header {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 8px;
+  font-size: 12px; font-weight: 600;
+  color: var(--text-secondary);
+}
+.child-age-select {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.child-age-select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
 .autocomplete-list {
   position: absolute; top: 100%; left: 0; right: 0;
   background: var(--bg-elevated);
@@ -493,129 +621,6 @@ body {
   border-radius: var(--radius-full);
   font-family: var(--font-mono);
 }
-
-/* ═══════════════════════════════════════════════════════════════
-   MAP SECTION
-   ═══════════════════════════════════════════════════════════════ */
-.map-section { padding: 0 0 32px; }
-.map-card {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-xl);
-  padding: 24px;
-  position: relative; overflow: hidden;
-}
-.map-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 16px;
-}
-.map-title { font-size: 18px; font-weight: 700; }
-.map-legend {
-  display: flex; gap: 16px; font-size: 12px;
-  color: var(--text-secondary);
-}
-.legend-item { display: flex; align-items: center; gap: 6px; }
-.legend-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-}
-.legend-dot.user { background: var(--accent-primary); }
-.legend-dot.airport { background: var(--success); }
-.legend-dot.radius { background: rgba(99,102,241,0.3); }
-.map-svg-wrap {
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--border-primary);
-}
-.map-svg-wrap svg { display: block; width: 100%; height: auto; }
-.airport-marker {
-  cursor: pointer;
-  transition: transform var(--transition-fast);
-}
-.airport-marker:hover { transform: scale(1.3); }
-.airport-marker circle { transition: all var(--transition-fast); }
-.airport-marker.in-radius circle { fill: var(--success); }
-.airport-marker.out-radius circle { fill: var(--text-tertiary); opacity: 0.5; }
-.user-marker { animation: pulse 2s infinite; }
-.radius-circle {
-  fill: rgba(99,102,241,0.1);
-  stroke: var(--accent-primary);
-  stroke-width: 2;
-  stroke-dasharray: 5,5;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   PRICE CALENDAR (HEATMAP)
-   ═══════════════════════════════════════════════════════════════ */
-.calendar-section { padding: 0 0 32px; }
-.calendar-card {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-xl);
-  padding: 24px;
-}
-.calendar-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 16px;
-}
-.calendar-title { font-size: 18px; font-weight: 700; }
-.calendar-legend {
-  display: flex; gap: 8px; font-size: 11px;
-  color: var(--text-secondary); align-items: center;
-}
-.legend-gradient {
-  width: 100px; height: 12px;
-  background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
-  border-radius: var(--radius-full);
-}
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-}
-.calendar-day {
-  aspect-ratio: 1;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-md);
-  padding: 8px;
-  display: flex; flex-direction: column;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  position: relative; overflow: hidden;
-}
-.calendar-day:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--accent-primary);
-}
-.calendar-day.best {
-  background: var(--accent-gradient);
-  color: white; border-color: transparent;
-  box-shadow: var(--shadow-glow);
-}
-.calendar-day.best::after {
-  content: '⭐'; position: absolute;
-  top: 4px; right: 4px; font-size: 10px;
-}
-.calendar-day-num {
-  font-size: 14px; font-weight: 700;
-  font-family: var(--font-mono);
-}
-.calendar-day-name {
-  font-size: 10px; opacity: 0.7;
-  text-transform: uppercase;
-}
-.calendar-day-price {
-  font-size: 11px; font-weight: 600;
-  font-family: var(--font-mono);
-}
-.heat-1 { background: #10b981 !important; color: white !important; }
-.heat-2 { background: #34d399 !important; color: white !important; }
-.heat-3 { background: #fbbf24 !important; color: #0f172a !important; }
-.heat-4 { background: #f59e0b !important; color: white !important; }
-.heat-5 { background: #ef4444 !important; color: white !important; }
 
 /* ═══════════════════════════════════════════════════════════════
    RESULTS LAYOUT
@@ -707,7 +712,7 @@ body {
 .flight-card:hover::before { opacity: 1; }
 .flight-card.cheapest { border-color: var(--success); }
 .flight-card.cheapest::before { background: var(--success); opacity: 1; }
-.flight-card.cheapest-badge {
+.cheapest-badge {
   position: absolute; top: 16px; right: 16px;
   padding: 4px 10px;
   background: var(--success);
@@ -715,6 +720,7 @@ body {
   border-radius: var(--radius-full);
   font-size: 10px; font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 .flight-card-top {
   display: flex; justify-content: space-between;
@@ -728,11 +734,11 @@ body {
   margin-bottom: 4px;
 }
 .flight-airline-logo {
-  width: 24px; height: 24px;
+  width: 28px; height: 28px;
   background: var(--bg-secondary);
   border-radius: var(--radius-sm);
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
 }
 .flight-route {
   font-size: 18px; font-weight: 700;
@@ -746,7 +752,7 @@ body {
 }
 .flight-price-block { text-align: right; }
 .flight-price {
-  font-size: 28px; font-weight: 800;
+  font-size: 32px; font-weight: 800;
   font-family: var(--font-mono);
   background: var(--accent-gradient);
   -webkit-background-clip: text; background-clip: text;
@@ -757,69 +763,115 @@ body {
   font-size: 11px; color: var(--text-tertiary);
   margin-top: 4px;
 }
+
+/* TIME BLOCK - LARGE AND CLEAR */
 .flight-time-block {
-  display: flex; align-items: center;
-  gap: 16px; padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px; align-items: center;
+  padding: 20px;
   background: var(--bg-secondary);
   border-radius: var(--radius-lg);
   margin-bottom: 16px;
+  border: 1px solid var(--border-primary);
 }
 .time-point {
   display: flex; flex-direction: column;
-  align-items: center; min-width: 80px;
+  align-items: center;
 }
+.time-point.departure { align-items: flex-start; }
+.time-point.arrival { align-items: flex-end; }
 .time-value {
-  font-size: 24px; font-weight: 800;
+  font-size: 36px; font-weight: 900;
   font-family: var(--font-mono);
   color: var(--text-primary);
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 .time-label {
   font-size: 10px; color: var(--text-tertiary);
-  text-transform: uppercase; margin-top: 4px;
+  text-transform: uppercase; margin-top: 6px;
+  letter-spacing: 0.1em;
 }
 .time-airport {
-  font-size: 11px; color: var(--accent-primary);
-  font-weight: 600; margin-top: 2px;
+  font-size: 13px; color: var(--accent-primary);
+  font-weight: 700; margin-top: 4px;
 }
 .time-arrow {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; gap: 4px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  min-width: 140px;
 }
 .time-duration {
-  font-size: 11px; font-weight: 600;
+  font-size: 12px; font-weight: 700;
   color: var(--accent-primary);
   background: var(--bg-primary);
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: var(--radius-full);
   font-family: var(--font-mono);
+  border: 1px solid var(--border-primary);
 }
 .time-line {
   width: 100%; height: 2px;
   background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
   position: relative; border-radius: 2px;
 }
+.time-line::before {
+  content: ''; position: absolute;
+  left: -4px; top: -3px;
+  width: 8px; height: 8px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+}
 .time-line::after {
   content: '✈️'; position: absolute;
-  right: -4px; top: -10px; font-size: 16px;
+  right: -8px; top: -10px; font-size: 18px;
 }
 .time-stops {
-  font-size: 10px; color: var(--text-tertiary);
+  font-size: 11px; color: var(--text-tertiary);
+  font-weight: 500;
 }
+
 .flight-tags {
   display: flex; gap: 6px; flex-wrap: wrap;
   margin-bottom: 12px;
 }
 .tag {
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: var(--radius-full);
   font-size: 10px; font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 .tag-lowcost { background: rgba(59,130,246,0.1); color: var(--info); }
 .tag-split { background: rgba(245,158,11,0.1); color: var(--warning); }
 .tag-mistake { background: rgba(239,68,68,0.1); color: var(--danger); }
 .tag-visa { background: rgba(16,185,129,0.1); color: var(--success); }
 .tag-mode { background: var(--accent-gradient); color: white; }
+
+.flight-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+}
+.detail-item {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.detail-label {
+  font-size: 10px; color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.detail-value {
+  font-size: 13px; font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
 .flight-actions {
   display: flex; gap: 8px;
   padding-top: 12px;
@@ -844,6 +896,55 @@ body {
 .action-btn.primary {
   background: var(--accent-gradient);
   color: white; border-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAP (AT THE BOTTOM)
+   ═══════════════════════════════════════════════════════════════ */
+.map-section { padding: 0 0 32px; }
+.map-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  position: relative; overflow: hidden;
+}
+.map-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px; flex-wrap: wrap; gap: 12px;
+}
+.map-title { font-size: 18px; font-weight: 700; }
+.map-legend {
+  display: flex; gap: 16px; font-size: 12px;
+  color: var(--text-secondary); flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.legend-dot.user { background: var(--accent-primary); }
+.legend-dot.airport { background: var(--success); }
+.legend-dot.radius { background: rgba(99,102,241,0.3); }
+.map-svg-wrap {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-primary);
+}
+.map-svg-wrap svg { display: block; width: 100%; height: auto; }
+.airport-marker {
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+.airport-marker:hover { transform: scale(1.3); }
+.airport-marker.in-radius circle { fill: var(--success); }
+.airport-marker.out-radius circle { fill: var(--text-tertiary); opacity: 0.5; }
+.user-marker { animation: pulse 2s infinite; }
+.radius-circle {
+  fill: rgba(99,102,241,0.1);
+  stroke: var(--accent-primary);
+  stroke-width: 2;
+  stroke-dasharray: 5,5;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -884,10 +985,7 @@ body {
   text-align: center; padding: 60px 20px;
   color: var(--text-tertiary);
 }
-.empty-state-icon {
-  font-size: 80px; margin-bottom: 16px;
-  opacity: 0.3;
-}
+.empty-state-icon { font-size: 80px; margin-bottom: 16px; opacity: 0.3; }
 .empty-state-title {
   font-size: 20px; font-weight: 700;
   color: var(--text-primary);
@@ -905,10 +1003,6 @@ body {
   color: var(--text-tertiary);
   font-size: 13px;
 }
-.footer a {
-  color: var(--accent-primary);
-  text-decoration: none;
-}
 
 /* ═══════════════════════════════════════════════════════════════
    RESPONSIVE
@@ -922,24 +1016,27 @@ body {
   .profile-name { display: none; }
   .location-grid { grid-template-columns: 1fr; }
   .hero-title { font-size: 36px; }
-  .calendar-grid { grid-template-columns: repeat(4, 1fr); }
   .flight-card-top { flex-direction: column; }
   .flight-price-block { text-align: left; }
+  .flight-time-block {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .time-point.departure, .time-point.arrival { align-items: center; }
+  .time-value { font-size: 28px; }
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     HEADER
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- HEADER -->
 <header class="header">
   <div class="container">
     <div class="header-inner">
       <a href="#" class="logo">
         <div class="logo-icon">🦅</div>
         <span class="logo-text">SkyHunter AI</span>
-        <span class="logo-version">v9.0</span>
+        <span class="logo-version">v9.1</span>
       </a>
       <div class="header-actions">
         <div class="lang-switcher">
@@ -950,15 +1047,12 @@ body {
         <button class="theme-toggle" id="themeToggle" title="Ctrl+D">
           <span id="themeIcon">🌙</span>
         </button>
-        <button class="kbd-btn" id="kbdBtn" title="Ctrl+K">⌨️</button>
       </div>
     </div>
   </div>
 </header>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     HERO
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- HERO -->
 <section class="hero">
   <div class="container">
     <div class="hero-content">
@@ -974,30 +1068,16 @@ body {
         Премиум AI-поиск с прогнозом цен, интерактивной картой и мультиязычным интерфейсом
       </p>
       <div class="hero-stats">
-        <div class="stat-card">
-          <div class="stat-value">35+</div>
-          <div class="stat-label" data-i18n="statRoutes">Направлений</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">18</div>
-          <div class="stat-label" data-i18n="statAirports">Аэропортов</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="statSaved">0 CHF</div>
-          <div class="stat-label" data-i18n="statSaved">Сэкономлено</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="statSearches">0</div>
-          <div class="stat-label" data-i18n="statSearches">Поисков</div>
-        </div>
+        <div class="stat-card"><div class="stat-value">35+</div><div class="stat-label" data-i18n="statRoutes">Направлений</div></div>
+        <div class="stat-card"><div class="stat-value">18</div><div class="stat-label" data-i18n="statAirports">Аэропортов</div></div>
+        <div class="stat-card"><div class="stat-value" id="statSaved">0 CHF</div><div class="stat-label" data-i18n="statSaved">Сэкономлено</div></div>
+        <div class="stat-card"><div class="stat-value" id="statSearches">0</div><div class="stat-label" data-i18n="statSearches">Поисков</div></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     LOCATION SELECTOR (NEW!)
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- LOCATION SELECTOR WITH AUTOCOMPLETE -->
 <section class="location-section">
   <div class="container">
     <div class="location-card">
@@ -1011,9 +1091,10 @@ body {
       <div class="location-grid">
         <div class="location-input-wrap">
           <input type="text" class="location-input" id="userLocation" 
-                 placeholder="Например: Тун, Bern, Zurich..." 
-                 value="Тун, Швейцария">
+                 placeholder="Начните вводить: Тун, Берн, Цюрих..." 
+                 value="Тун" autocomplete="off">
           <button class="geo-btn" id="geoBtn" title="Определить автоматически">📍</button>
+          <div class="location-autocomplete" id="locationAutocomplete"></div>
         </div>
         <div class="radius-wrap">
           <div class="radius-label" data-i18n="radiusLabel">Радиус поиска</div>
@@ -1036,17 +1117,17 @@ body {
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     SEARCH FORM
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- SEARCH FORM -->
 <section class="search-section">
   <div class="container">
     <div class="search-card">
       <div class="search-grid">
         <div class="form-field">
-          <label class="form-label" data-i18n="fromLabel">🛫 Откуда</label>
-          <input type="text" class="form-input" id="fromInput" 
-                 placeholder="Авто из локации" readonly>
+          <label class="form-label" data-i18n="fromLabel">🛫 Откуда (аэропорт)</label>
+          <div class="from-display" id="fromDisplay">
+            <span class="from-airport-code" id="fromCode">—</span>
+            <span id="fromName" data-i18n="fromSelect">Выберите аэропорт выше</span>
+          </div>
         </div>
         <div class="form-field">
           <label class="form-label" data-i18n="toLabel">🛬 Куда</label>
@@ -1063,14 +1144,12 @@ body {
           <input type="date" class="form-input" id="dateBack">
         </div>
         <div class="form-field">
-          <label class="form-label" data-i18n="paxLabel">👥 Пассажиры</label>
-          <select class="form-input" id="passengers">
+          <label class="form-label" data-i18n="paxLabel">👥 Взрослые</label>
+          <select class="form-input" id="adults">
             <option value="1">1</option>
-            <option value="2">2</option>
+            <option value="2" selected>2</option>
             <option value="3">3</option>
-            <option value="4" selected>4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
+            <option value="4">4</option>
           </select>
         </div>
         <div class="form-field">
@@ -1083,7 +1162,47 @@ body {
             <option value="4" selected>4 × 23 кг</option>
           </select>
         </div>
+        
+        <!-- CHILDREN BLOCK -->
+        <div class="children-block">
+          <div class="children-header">
+            <div class="children-title">
+              <span>🧒</span>
+              <span data-i18n="childrenTitle">Дети</span>
+            </div>
+            <div class="children-count">
+              <button class="children-count-btn" onclick="changeChildrenCount(-1)">−</button>
+              <span class="children-count-value" id="childrenCount">1</span>
+              <button class="children-count-btn" onclick="changeChildrenCount(1)">+</button>
+            </div>
+          </div>
+          <div class="children-list" id="childrenList">
+            <div class="child-item">
+              <div class="child-item-header">
+                <span>👶</span>
+                <span data-i18n="child1">Ребёнок 1</span>
+              </div>
+              <select class="child-age-select" data-child="0">
+                <option value="2">2 года</option>
+                <option value="3">3 года</option>
+                <option value="4">4 года</option>
+                <option value="5">5 лет</option>
+                <option value="6">6 лет</option>
+                <option value="7">7 лет</option>
+                <option value="8">8 лет</option>
+                <option value="9" selected>9 лет</option>
+                <option value="10">10 лет</option>
+                <option value="11">11 лет</option>
+                <option value="12">12 лет</option>
+                <option value="13">13 лет</option>
+                <option value="14">14 лет</option>
+                <option value="15">15 лет</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
+      
       <div class="mode-pills">
         <button class="mode-pill active" data-mode="any" data-i18n="modeAny">🎯 Любое время</button>
         <button class="mode-pill" data-mode="morning" data-i18n="modeMorning">🌅 Утро (до 12:00)</button>
@@ -1098,66 +1217,10 @@ body {
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MAP
-     ═══════════════════════════════════════════════════════════════ -->
-<section class="map-section">
-  <div class="container">
-    <div class="map-card">
-      <div class="map-header">
-        <div class="map-title" data-i18n="mapTitle">🗺️ Карта аэропортов</div>
-        <div class="map-legend">
-          <div class="legend-item"><div class="legend-dot user"></div><span data-i18n="legendYou">Вы</span></div>
-          <div class="legend-item"><div class="legend-dot airport"></div><span data-i18n="legendAirport">В радиусе</span></div>
-          <div class="legend-item"><div class="legend-dot radius"></div><span data-i18n="legendRadius">Радиус</span></div>
-        </div>
-      </div>
-      <div class="map-svg-wrap">
-        <svg id="europeMap" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
-          <!-- Simplified Europe outline -->
-          <path d="M 100 150 Q 150 100 250 120 L 350 100 Q 450 110 550 130 L 650 150 Q 700 200 680 280 L 650 350 Q 600 400 500 420 L 400 430 Q 300 420 200 400 L 150 350 Q 100 300 110 230 Z" 
-                fill="var(--bg-tertiary)" stroke="var(--border-primary)" stroke-width="1" opacity="0.5"/>
-          <!-- Radius circle (dynamic) -->
-          <circle id="radiusCircle" class="radius-circle" cx="400" cy="250" r="100"/>
-          <!-- User marker (dynamic) -->
-          <g id="userMarker" class="user-marker" transform="translate(400,250)">
-            <circle r="12" fill="var(--accent-primary)" opacity="0.3"/>
-            <circle r="6" fill="var(--accent-primary)"/>
-          </g>
-          <!-- Airport markers (dynamic) -->
-          <g id="airportMarkers"></g>
-        </svg>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     PRICE CALENDAR
-     ═══════════════════════════════════════════════════════════════ -->
-<section class="calendar-section" id="calendarSection" style="display:none;">
-  <div class="container">
-    <div class="calendar-card">
-      <div class="calendar-header">
-        <div class="calendar-title" data-i18n="calendarTitle">📅 Календарь цен (30 дней)</div>
-        <div class="calendar-legend">
-          <span data-i18n="cheap">Дёшево</span>
-          <div class="legend-gradient"></div>
-          <span data-i18n="expensive">Дорого</span>
-        </div>
-      </div>
-      <div class="calendar-grid" id="calendarGrid"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     RESULTS
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- RESULTS -->
 <section class="results-section">
   <div class="container">
     <div class="results-layout">
-      <!-- Filters -->
       <aside class="filters-panel">
         <div class="filter-group">
           <div class="filter-title" data-i18n="filterPrice">💰 Цена (CHF)</div>
@@ -1170,15 +1233,9 @@ body {
         </div>
         <div class="filter-group">
           <div class="filter-title" data-i18n="filterStops">🔄 Пересадки</div>
-          <label class="filter-checkbox">
-            <input type="checkbox" checked> <span data-i18n="direct">Прямые</span>
-          </label>
-          <label class="filter-checkbox">
-            <input type="checkbox" checked> <span data-i18n="oneStop">1 пересадка</span>
-          </label>
-          <label class="filter-checkbox">
-            <input type="checkbox"> <span data-i18n="twoPlus">2+ пересадки</span>
-          </label>
+          <label class="filter-checkbox"><input type="checkbox" checked> <span data-i18n="direct">Прямые</span></label>
+          <label class="filter-checkbox"><input type="checkbox" checked> <span data-i18n="oneStop">1 пересадка</span></label>
+          <label class="filter-checkbox"><input type="checkbox"> <span data-i18n="twoPlus">2+ пересадки</span></label>
         </div>
         <div class="filter-group">
           <div class="filter-title" data-i18n="filterAirlines">✈️ Авиакомпании</div>
@@ -1189,18 +1246,8 @@ body {
           <label class="filter-checkbox"><input type="checkbox" checked> Lufthansa</label>
           <label class="filter-checkbox"><input type="checkbox" checked> Pegasus</label>
         </div>
-        <div class="filter-group">
-          <div class="filter-title" data-i18n="filterFeatures">✨ Особенности</div>
-          <label class="filter-checkbox">
-            <input type="checkbox" id="filterLowcost"> <span data-i18n="onlyLowcost">Только лоукосты</span>
-          </label>
-          <label class="filter-checkbox">
-            <input type="checkbox" id="filterDirect"> <span data-i18n="onlyDirect">Только прямые</span>
-          </label>
-        </div>
       </aside>
 
-      <!-- Results -->
       <div class="results-panel">
         <div class="results-header-bar">
           <div class="results-count">
@@ -1226,9 +1273,37 @@ body {
   </div>
 </section>
 
+<!-- MAP AT THE BOTTOM -->
+<section class="map-section">
+  <div class="container">
+    <div class="map-card">
+      <div class="map-header">
+        <div class="map-title" data-i18n="mapTitle">🗺️ Карта аэропортов</div>
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot user"></div><span data-i18n="legendYou">Вы</span></div>
+          <div class="legend-item"><div class="legend-dot airport"></div><span data-i18n="legendAirport">В радиусе</span></div>
+          <div class="legend-item"><div class="legend-dot radius"></div><span data-i18n="legendRadius">Радиус</span></div>
+        </div>
+      </div>
+      <div class="map-svg-wrap">
+        <svg id="europeMap" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 100 150 Q 150 100 250 120 L 350 100 Q 450 110 550 130 L 650 150 Q 700 200 680 280 L 650 350 Q 600 400 500 420 L 400 430 Q 300 420 200 400 L 150 350 Q 100 300 110 230 Z" 
+                fill="var(--bg-tertiary)" stroke="var(--border-primary)" stroke-width="1" opacity="0.5"/>
+          <circle id="radiusCircle" class="radius-circle" cx="400" cy="250" r="100"/>
+          <g id="userMarker" class="user-marker" transform="translate(400,250)">
+            <circle r="12" fill="var(--accent-primary)" opacity="0.3"/>
+            <circle r="6" fill="var(--accent-primary)"/>
+          </g>
+          <g id="airportMarkers"></g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer class="footer">
   <div class="container">
-    <p>SkyHunter AI v9.0 • <span data-i18n="footerMade">Сделано с</span> ❤️ <span data-i18n="footerFor">для путешественников</span></p>
+    <p>SkyHunter AI v9.1 • <span data-i18n="footerMade">Сделано с</span> ❤️ <span data-i18n="footerFor">для путешественников</span></p>
     <p style="margin-top:8px;font-size:11px;">
       <span data-i18n="footerDisclaimer">Информация о ценах, визах и рейсах может меняться. Проверяйте на официальных сайтах.</span>
     </p>
@@ -1244,30 +1319,27 @@ body {
 const translations = {
   ru: {
     heroBadge: 'AI-анализ 35+ направлений в реальном времени',
-    heroTitle1: 'Найди самые дешёвые',
-    heroTitle2: 'авиабилеты в Европе',
+    heroTitle1: 'Найди самые дешёвые', heroTitle2: 'авиабилеты в Европе',
     heroSubtitle: 'Премиум AI-поиск с прогнозом цен, интерактивной картой и мультиязычным интерфейсом',
     statRoutes: 'Направлений', statAirports: 'Аэропортов', statSaved: 'Сэкономлено', statSearches: 'Поисков',
     locTitle: 'Ваше местоположение',
     locSubtitle: 'Выберите город и радиус поиска аэропортов',
-    radiusLabel: 'Радиус поиска',
-    applyBtn: 'Применить',
+    radiusLabel: 'Радиус поиска', applyBtn: 'Применить',
     airportsFound: 'Найдено аэропортов:',
-    fromLabel: '🛫 Откуда', toLabel: '🛬 Куда',
+    fromLabel: '🛫 Откуда (аэропорт)', toLabel: '🛬 Куда',
+    fromSelect: 'Выберите аэропорт выше',
     dateOutLabel: '📅 Вылет', dateBackLabel: '📅 Возврат',
-    paxLabel: '👥 Пассажиры', baggageLabel: '🧳 Багаж',
+    paxLabel: '👥 Взрослые', baggageLabel: '🧳 Багаж',
     noBag: 'Без багажа',
+    childrenTitle: 'Дети', child1: 'Ребёнок 1',
     modeAny: '🎯 Любое время', modeMorning: '🌅 Утро (до 12:00)',
     modeDay: '☀️ День (12-22)', modeEvening: '🌙 Вечер (после 22)',
     searchBtn: '🔍 Найти лучшие предложения',
     mapTitle: '🗺️ Карта аэропортов',
     legendYou: 'Вы', legendAirport: 'В радиусе', legendRadius: 'Радиус',
-    calendarTitle: '📅 Календарь цен (30 дней)',
-    cheap: 'Дёшево', expensive: 'Дорого',
     filterPrice: '💰 Цена (CHF)', filterStops: '🔄 Пересадки',
     direct: 'Прямые', oneStop: '1 пересадка', twoPlus: '2+ пересадки',
-    filterAirlines: '✈️ Авиакомпании', filterFeatures: '✨ Особенности',
-    onlyLowcost: 'Только лоукосты', onlyDirect: 'Только прямые',
+    filterAirlines: '✈️ Авиакомпании',
     resultsFound: 'рейсов найдено',
     sortPrice: 'Сортировка: по цене ↑',
     sortDuration: 'По длительности',
@@ -1276,41 +1348,32 @@ const translations = {
     emptyText: 'Укажите направление и даты, затем нажмите «Найти»',
     footerMade: 'Сделано с', footerFor: 'для путешественников',
     footerDisclaimer: 'Информация о ценах, визах и рейсах может меняться. Проверяйте на официальных сайтах.',
-    toastLocationSet: 'Локация установлена',
-    toastAirportsFound: 'аэропортов в радиусе',
-    toastSearchStarted: 'Поиск запущен',
-    toastAddedToFav: 'Добавлено в избранное',
-    cheapest: 'САМЫЙ ДЕШЁВЫЙ',
-    from: 'из', to: 'в', departure: 'Вылет', arrival: 'Прилёт',
-    direct_flight: 'Прямой', stops: 'пересадок',
-    book: 'Забронировать', favorite: 'В избранное', compare: 'Сравнить', share: 'Поделиться'
+    departure: 'Вылет', arrival: 'Прилёт',
+    cheapest: 'САМЫЙ ДЕШЁВЫЙ'
   },
   en: {
     heroBadge: 'AI analysis of 35+ destinations in real-time',
-    heroTitle1: 'Find the cheapest',
-    heroTitle2: 'flights in Europe',
+    heroTitle1: 'Find the cheapest', heroTitle2: 'flights in Europe',
     heroSubtitle: 'Premium AI search with price prediction, interactive map and multilingual interface',
     statRoutes: 'Destinations', statAirports: 'Airports', statSaved: 'Saved', statSearches: 'Searches',
     locTitle: 'Your location',
     locSubtitle: 'Choose city and airport search radius',
-    radiusLabel: 'Search radius',
-    applyBtn: 'Apply',
+    radiusLabel: 'Search radius', applyBtn: 'Apply',
     airportsFound: 'Airports found:',
-    fromLabel: '🛫 From', toLabel: '🛬 To',
+    fromLabel: '🛫 From (airport)', toLabel: '🛬 To',
+    fromSelect: 'Select airport above',
     dateOutLabel: '📅 Departure', dateBackLabel: '📅 Return',
-    paxLabel: '👥 Passengers', baggageLabel: '🧳 Baggage',
+    paxLabel: '👥 Adults', baggageLabel: '🧳 Baggage',
     noBag: 'No baggage',
+    childrenTitle: 'Children', child1: 'Child 1',
     modeAny: '🎯 Any time', modeMorning: '🌅 Morning (before 12)',
     modeDay: '☀️ Day (12-22)', modeEvening: '🌙 Evening (after 22)',
     searchBtn: '🔍 Find best deals',
     mapTitle: '🗺️ Airport map',
     legendYou: 'You', legendAirport: 'In radius', legendRadius: 'Radius',
-    calendarTitle: '📅 Price calendar (30 days)',
-    cheap: 'Cheap', expensive: 'Expensive',
     filterPrice: '💰 Price (CHF)', filterStops: '🔄 Stops',
     direct: 'Direct', oneStop: '1 stop', twoPlus: '2+ stops',
-    filterAirlines: '✈️ Airlines', filterFeatures: '✨ Features',
-    onlyLowcost: 'Low-cost only', onlyDirect: 'Direct only',
+    filterAirlines: '✈️ Airlines',
     resultsFound: 'flights found',
     sortPrice: 'Sort: by price ↑',
     sortDuration: 'By duration',
@@ -1319,41 +1382,32 @@ const translations = {
     emptyText: 'Enter destination and dates, then click "Find"',
     footerMade: 'Made with', footerFor: 'for travelers',
     footerDisclaimer: 'Prices, visas and flights may change. Check official websites.',
-    toastLocationSet: 'Location set',
-    toastAirportsFound: 'airports in radius',
-    toastSearchStarted: 'Search started',
-    toastAddedToFav: 'Added to favorites',
-    cheapest: 'CHEAPEST',
-    from: 'from', to: 'to', departure: 'Departure', arrival: 'Arrival',
-    direct_flight: 'Direct', stops: 'stops',
-    book: 'Book', favorite: 'Favorite', compare: 'Compare', share: 'Share'
+    departure: 'Departure', arrival: 'Arrival',
+    cheapest: 'CHEAPEST'
   },
   de: {
     heroBadge: 'KI-Analyse von 35+ Zielen in Echtzeit',
-    heroTitle1: 'Finde die günstigsten',
-    heroTitle2: 'Flüge in Europa',
+    heroTitle1: 'Finde die günstigsten', heroTitle2: 'Flüge in Europa',
     heroSubtitle: 'Premium-KI-Suche mit Preisvorhersage, interaktiver Karte und mehrsprachiger Oberfläche',
     statRoutes: 'Ziele', statAirports: 'Flughäfen', statSaved: 'Gespart', statSearches: 'Suchen',
     locTitle: 'Ihr Standort',
     locSubtitle: 'Wählen Sie Stadt und Suchradius für Flughäfen',
-    radiusLabel: 'Suchradius',
-    applyBtn: 'Anwenden',
+    radiusLabel: 'Suchradius', applyBtn: 'Anwenden',
     airportsFound: 'Flughäfen gefunden:',
-    fromLabel: '🛫 Von', toLabel: '🛬 Nach',
+    fromLabel: '🛫 Von (Flughafen)', toLabel: '🛬 Nach',
+    fromSelect: 'Wählen Sie Flughafen oben',
     dateOutLabel: '📅 Abflug', dateBackLabel: '📅 Rückkehr',
-    paxLabel: '👥 Passagiere', baggageLabel: '🧳 Gepäck',
+    paxLabel: '👥 Erwachsene', baggageLabel: '🧳 Gepäck',
     noBag: 'Ohne Gepäck',
+    childrenTitle: 'Kinder', child1: 'Kind 1',
     modeAny: '🎯 Jede Zeit', modeMorning: '🌅 Morgen (vor 12)',
     modeDay: '☀️ Tag (12-22)', modeEvening: '🌙 Abend (nach 22)',
     searchBtn: '🔍 Beste Angebote finden',
     mapTitle: '🗺️ Flughafenkarte',
     legendYou: 'Sie', legendAirport: 'Im Radius', legendRadius: 'Radius',
-    calendarTitle: '📅 Preiskalender (30 Tage)',
-    cheap: 'Günstig', expensive: 'Teuer',
     filterPrice: '💰 Preis (CHF)', filterStops: '🔄 Zwischenstopps',
     direct: 'Direkt', oneStop: '1 Stopp', twoPlus: '2+ Stopps',
-    filterAirlines: '✈️ Fluggesellschaften', filterFeatures: '✨ Merkmale',
-    onlyLowcost: 'Nur Billigflieger', onlyDirect: 'Nur Direkt',
+    filterAirlines: '✈️ Fluggesellschaften',
     resultsFound: 'Flüge gefunden',
     sortPrice: 'Sortierung: nach Preis ↑',
     sortDuration: 'Nach Dauer',
@@ -1362,14 +1416,8 @@ const translations = {
     emptyText: 'Geben Sie Ziel und Daten ein, dann klicken Sie "Finden"',
     footerMade: 'Gemacht mit', footerFor: 'für Reisende',
     footerDisclaimer: 'Preise, Visa und Flüge können sich ändern. Prüfen Sie offizielle Websites.',
-    toastLocationSet: 'Standort festgelegt',
-    toastAirportsFound: 'Flughäfen im Radius',
-    toastSearchStarted: 'Suche gestartet',
-    toastAddedToFav: 'Zu Favoriten hinzugefügt',
-    cheapest: 'AM GÜNSTIGSTEN',
-    from: 'von', to: 'nach', departure: 'Abflug', arrival: 'Ankunft',
-    direct_flight: 'Direkt', stops: 'Stopps',
-    book: 'Buchen', favorite: 'Favorit', compare: 'Vergleichen', share: 'Teilen'
+    departure: 'Abflug', arrival: 'Ankunft',
+    cheapest: 'AM GÜNSTIGSTEN'
   }
 };
 
@@ -1389,7 +1437,31 @@ function applyLanguage(lang) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   AIRPORTS DATABASE WITH COORDINATES
+   CITIES DATABASE (FOR AUTOCOMPLETE)
+   ═══════════════════════════════════════════════════════════════ */
+const CITIES = [
+  { name: 'Тун', nameEn: 'Thun', nameDe: 'Thun', country: 'Швейцария', countryEn: 'Switzerland', countryDe: 'Schweiz', lat: 46.76, lon: 7.63, flag: '🇨🇭' },
+  { name: 'Берн', nameEn: 'Bern', nameDe: 'Bern', country: 'Швейцария', countryEn: 'Switzerland', countryDe: 'Schweiz', lat: 46.95, lon: 7.45, flag: '🇨🇭' },
+  { name: 'Цюрих', nameEn: 'Zurich', nameDe: 'Zürich', country: 'Швейцария', countryEn: 'Switzerland', countryDe: 'Schweiz', lat: 47.37, lon: 8.54, flag: '🇨🇭' },
+  { name: 'Базель', nameEn: 'Basel', nameDe: 'Basel', country: 'Швейцария', countryEn: 'Switzerland', countryDe: 'Schweiz', lat: 47.56, lon: 7.59, flag: '🇨🇭' },
+  { name: 'Женева', nameEn: 'Geneva', nameDe: 'Genf', country: 'Швейцария', countryEn: 'Switzerland', countryDe: 'Schweiz', lat: 46.20, lon: 6.14, flag: '🇨🇭' },
+  { name: 'Люцерн', nameEn: 'Lucerne', nameDe: 'Luzern', country: 'Швейцария', countryEn: 'Switzerland', countryDe: 'Schweiz', lat: 47.05, lon: 8.31, flag: '🇨🇭' },
+  { name: 'Лозанна', nameEn: 'Lausanne', nameDe: 'Lausanne', country: 'Швейцария', countryEn: 'Switzerland', countryDe: 'Schweiz', lat: 46.52, lon: 6.63, flag: '🇨🇭' },
+  { name: 'Милан', nameEn: 'Milan', nameDe: 'Mailand', country: 'Италия', countryEn: 'Italy', countryDe: 'Italien', lat: 45.46, lon: 9.19, flag: '🇮🇹' },
+  { name: 'Мюнхен', nameEn: 'Munich', nameDe: 'München', country: 'Германия', countryEn: 'Germany', countryDe: 'Deutschland', lat: 48.14, lon: 11.58, flag: '🇩🇪' },
+  { name: 'Штутгарт', nameEn: 'Stuttgart', nameDe: 'Stuttgart', country: 'Германия', countryEn: 'Germany', countryDe: 'Deutschland', lat: 48.78, lon: 9.18, flag: '🇩🇪' },
+  { name: 'Страсбург', nameEn: 'Strasbourg', nameDe: 'Straßburg', country: 'Франция', countryEn: 'France', countryDe: 'Frankreich', lat: 48.58, lon: 7.75, flag: '🇫🇷' },
+  { name: 'Лион', nameEn: 'Lyon', nameDe: 'Lyon', country: 'Франция', countryEn: 'France', countryDe: 'Frankreich', lat: 45.76, lon: 4.83, flag: '🇫🇷' },
+  { name: 'Париж', nameEn: 'Paris', nameDe: 'Paris', country: 'Франция', countryEn: 'France', countryDe: 'Frankreich', lat: 48.86, lon: 2.35, flag: '🇫🇷' },
+  { name: 'Фрайбург', nameEn: 'Freiburg', nameDe: 'Freiburg', country: 'Германия', countryEn: 'Germany', countryDe: 'Deutschland', lat: 47.99, lon: 7.85, flag: '🇩🇪' },
+  { name: 'Инсбрук', nameEn: 'Innsbruck', nameDe: 'Innsbruck', country: 'Австрия', countryEn: 'Austria', countryDe: 'Österreich', lat: 47.26, lon: 11.39, flag: '🇦🇹' },
+  { name: 'Вена', nameEn: 'Vienna', nameDe: 'Wien', country: 'Австрия', countryEn: 'Austria', countryDe: 'Österreich', lat: 48.21, lon: 16.37, flag: '🇦🇹' },
+  { name: 'Зальцбург', nameEn: 'Salzburg', nameDe: 'Salzburg', country: 'Австрия', countryEn: 'Austria', countryDe: 'Österreich', lat: 47.80, lon: 13.04, flag: '🇦🇹' },
+  { name: 'Комо', nameEn: 'Como', nameDe: 'Como', country: 'Италия', countryEn: 'Italy', countryDe: 'Italien', lat: 45.81, lon: 9.08, flag: '🇮🇹' }
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   AIRPORTS DATABASE
    ═══════════════════════════════════════════════════════════════ */
 const AIRPORTS = [
   { code: 'ZRH', name: 'Цюрих', lat: 47.46, lon: 8.55, country: 'CH', parking: 180, drive: 75 },
@@ -1411,19 +1483,6 @@ const AIRPORTS = [
   { code: 'NCE', name: 'Ницца', lat: 43.66, lon: 7.22, country: 'FR', parking: 85, drive: 300 },
   { code: 'INN', name: 'Инсбрук', lat: 47.26, lon: 11.34, country: 'AT', parking: 90, drive: 210 }
 ];
-
-const USER_LOCATIONS = {
-  'Тун': { lat: 46.76, lon: 7.63 },
-  'Thun': { lat: 46.76, lon: 7.63 },
-  'Bern': { lat: 46.95, lon: 7.45 },
-  'Берн': { lat: 46.95, lon: 7.45 },
-  'Zurich': { lat: 47.37, lon: 8.54 },
-  'Цюрих': { lat: 47.37, lon: 8.54 },
-  'Basel': { lat: 47.56, lon: 7.59 },
-  'Базель': { lat: 47.56, lon: 7.59 },
-  'Geneva': { lat: 46.20, lon: 6.14 },
-  'Женева': { lat: 46.20, lon: 6.14 }
-};
 
 const DESTINATIONS = [
   { keywords: ['тенерифе','tenerife','teneriffa','tfs'], code: 'TFS', name: 'Тенерифе', country: 'Испания', basePrice: 45, baseDuration: 270, airlines: ['Wizz Air','Ryanair','EasyJet'], visa: 'schengen' },
@@ -1461,7 +1520,8 @@ const state = {
   departureMode: 'any',
   searchCount: 0,
   totalSaved: 0,
-  favorites: []
+  childrenCount: 1,
+  childrenAges: [9]
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1498,24 +1558,127 @@ function showToast(type, title, message) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   LOCATION & RADIUS LOGIC
+   LOCATION AUTOCOMPLETE
+   ═══════════════════════════════════════════════════════════════ */
+const locationInput = document.getElementById('userLocation');
+const locationAutocomplete = document.getElementById('locationAutocomplete');
+
+locationInput.addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  if (q.length < 1) { locationAutocomplete.classList.remove('show'); return; }
+  
+  const matches = CITIES.filter(c => 
+    c.name.toLowerCase().includes(q) ||
+    c.nameEn.toLowerCase().includes(q) ||
+    c.nameDe.toLowerCase().includes(q) ||
+    c.country.toLowerCase().includes(q) ||
+    c.countryEn.toLowerCase().includes(q) ||
+    c.countryDe.toLowerCase().includes(q)
+  ).slice(0, 8);
+  
+  if (!matches.length) { locationAutocomplete.classList.remove('show'); return; }
+  
+  locationAutocomplete.innerHTML = matches.map(c => {
+    const displayName = currentLang === 'en' ? c.nameEn : currentLang === 'de' ? c.nameDe : c.name;
+    const displayCountry = currentLang === 'en' ? c.countryEn : currentLang === 'de' ? c.countryDe : c.country;
+    return `
+      <div class="location-autocomplete-item" data-lat="${c.lat}" data-lon="${c.lon}" data-name="${displayName}">
+        <div class="loc-ac-icon">${c.flag}</div>
+        <div class="loc-ac-info">
+          <div class="loc-ac-name">${displayName}</div>
+          <div class="loc-ac-country">${displayCountry}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  locationAutocomplete.querySelectorAll('.location-autocomplete-item').forEach(item => {
+    item.addEventListener('mousedown', e => {
+      e.preventDefault();
+      state.userLocation = {
+        name: item.dataset.name,
+        lat: parseFloat(item.dataset.lat),
+        lon: parseFloat(item.dataset.lon)
+      };
+      locationInput.value = item.dataset.name;
+      locationAutocomplete.classList.remove('show');
+      calculateAirportsInRadius();
+      showToast('success', '📍 ' + (currentLang === 'ru' ? 'Локация установлена' : 'Location set'), item.dataset.name);
+    });
+  });
+  
+  locationAutocomplete.classList.add('show');
+});
+
+locationInput.addEventListener('blur', () => setTimeout(() => locationAutocomplete.classList.remove('show'), 200));
+locationInput.addEventListener('focus', function() { if (this.value.length >= 1) this.dispatchEvent(new Event('input')); });
+
+/* ═══════════════════════════════════════════════════════════════
+   CHILDREN COUNTER
+   ═══════════════════════════════════════════════════════════════ */
+function changeChildrenCount(delta) {
+  const newCount = state.childrenCount + delta;
+  if (newCount < 0 || newCount > 6) return;
+  state.childrenCount = newCount;
+  document.getElementById('childrenCount').textContent = newCount;
+  renderChildrenList();
+}
+
+function renderChildrenList() {
+  const list = document.getElementById('childrenList');
+  if (state.childrenCount === 0) {
+    list.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:12px;color:var(--text-tertiary);font-size:13px;">
+      ${currentLang === 'ru' ? 'Нет детей' : currentLang === 'en' ? 'No children' : 'Keine Kinder'}
+    </div>`;
+    return;
+  }
+  
+  const childLabels = {
+    ru: ['Ребёнок 1','Ребёнок 2','Ребёнок 3','Ребёнок 4','Ребёнок 5','Ребёнок 6'],
+    en: ['Child 1','Child 2','Child 3','Child 4','Child 5','Child 6'],
+    de: ['Kind 1','Kind 2','Kind 3','Kind 4','Kind 5','Kind 6']
+  };
+  
+  list.innerHTML = Array.from({length: state.childrenCount}, (_, i) => {
+    const age = state.childrenAges[i] || 9;
+    return `
+      <div class="child-item">
+        <div class="child-item-header">
+          <span>👶</span>
+          <span>${childLabels[currentLang][i]}</span>
+        </div>
+        <select class="child-age-select" data-child="${i}" onchange="updateChildAge(${i}, this.value)">
+          ${Array.from({length: 14}, (_, j) => {
+            const a = j + 2;
+            return `<option value="${a}" ${a === age ? 'selected' : ''}>${a} ${currentLang === 'ru' ? (a < 5 ? 'года' : 'лет') : currentLang === 'en' ? 'years' : 'Jahre'}</option>`;
+          }).join('')}
+        </select>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateChildAge(idx, age) {
+  state.childrenAges[idx] = parseInt(age);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   AIRPORTS IN RADIUS
    ═══════════════════════════════════════════════════════════════ */
 function calculateAirportsInRadius() {
   const { lat, lon } = state.userLocation;
-  const radius = state.radius;
-  
   state.airportsInRadius = AIRPORTS.map(apt => {
     const distance = haversine(lat, lon, apt.lat, apt.lon);
-    const driveTime = Math.round(distance * 1.3 / 80 * 60); // rough estimate
+    const driveTime = Math.round(distance * 1.3 / 80 * 60);
     return { ...apt, distance, driveTime };
-  }).filter(apt => apt.distance <= radius)
+  }).filter(apt => apt.distance <= state.radius)
     .sort((a,b) => a.distance - b.distance);
   
   state.selectedAirports = state.airportsInRadius.map(a => a.code);
   renderAirportsChips();
+  updateFromDisplay();
   updateMap();
   document.getElementById('airportsCount').textContent = state.airportsInRadius.length;
-  document.getElementById('fromInput').value = state.userLocation.name;
 }
 
 function renderAirportsChips() {
@@ -1537,32 +1700,41 @@ function renderAirportsChips() {
       } else {
         state.selectedAirports = state.selectedAirports.filter(c => c !== code);
       }
+      updateFromDisplay();
     });
   });
 }
 
-function updateMap() {
-  const svg = document.getElementById('europeMap');
-  const { lat, lon } = state.userLocation;
+function updateFromDisplay() {
+  const fromCode = document.getElementById('fromCode');
+  const fromName = document.getElementById('fromName');
   
-  // Convert lat/lon to SVG coordinates (simplified Mercator)
+  if (state.selectedAirports.length === 0) {
+    fromCode.textContent = '—';
+    fromName.textContent = translations[currentLang].fromSelect;
+  } else if (state.selectedAirports.length === 1) {
+    const apt = AIRPORTS.find(a => a.code === state.selectedAirports[0]);
+    fromCode.textContent = apt.code;
+    fromName.textContent = apt.name;
+  } else {
+    fromCode.textContent = state.selectedAirports.length;
+    fromName.textContent = `${state.selectedAirports.join(', ')}`;
+  }
+}
+
+function updateMap() {
+  const { lat, lon } = state.userLocation;
   const toSVG = (lat, lon) => ({
     x: (lon + 10) * 15 + 100,
     y: (60 - lat) * 12 + 50
   });
-  
   const userPos = toSVG(lat, lon);
-  
-  // Update user marker
   document.getElementById('userMarker').setAttribute('transform', `translate(${userPos.x},${userPos.y})`);
-  
-  // Update radius circle (scale: ~15px per 100km roughly)
   const radiusPx = state.radius / 100 * 15;
   document.getElementById('radiusCircle').setAttribute('cx', userPos.x);
   document.getElementById('radiusCircle').setAttribute('cy', userPos.y);
   document.getElementById('radiusCircle').setAttribute('r', radiusPx);
   
-  // Update airport markers
   const markersGroup = document.getElementById('airportMarkers');
   markersGroup.innerHTML = AIRPORTS.map(apt => {
     const pos = toSVG(apt.lat, apt.lon);
@@ -1581,7 +1753,7 @@ function updateMap() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   AUTOCOMPLETE
+   DESTINATION AUTOCOMPLETE
    ═══════════════════════════════════════════════════════════════ */
 const toInput = document.getElementById('toInput');
 const autocompleteList = document.getElementById('autocompleteList');
@@ -1589,22 +1761,18 @@ const autocompleteList = document.getElementById('autocompleteList');
 toInput.addEventListener('input', function() {
   const q = this.value.toLowerCase().trim();
   if (q.length < 2) { autocompleteList.classList.remove('show'); return; }
-  
   const matches = DESTINATIONS.filter(d =>
     d.keywords.some(k => k.includes(q)) ||
     d.name.toLowerCase().includes(q) ||
     d.country.toLowerCase().includes(q)
   ).slice(0, 8);
-  
   if (!matches.length) { autocompleteList.classList.remove('show'); return; }
-  
   autocompleteList.innerHTML = matches.map(d => `
     <div class="autocomplete-item" data-code="${d.code}">
       <div class="autocomplete-city">${d.name} (${d.code})</div>
       <div class="autocomplete-info">${d.country} • от ${d.basePrice} CHF</div>
     </div>
   `).join('');
-  
   autocompleteList.querySelectorAll('.autocomplete-item').forEach(item => {
     item.addEventListener('mousedown', e => {
       e.preventDefault();
@@ -1613,10 +1781,8 @@ toInput.addEventListener('input', function() {
       autocompleteList.classList.remove('show');
     });
   });
-  
   autocompleteList.classList.add('show');
 });
-
 toInput.addEventListener('blur', () => setTimeout(() => autocompleteList.classList.remove('show'), 200));
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1665,62 +1831,53 @@ function calcArrival(dep, dur) {
 function searchFlights() {
   const destQ = toInput.value;
   const dest = findDestination(destQ);
-  
   if (!dest) {
     showToast('warning', '⚠️ ' + (currentLang === 'ru' ? 'Направление не найдено' : 'Destination not found'), destQ);
     return;
   }
-  
   if (state.selectedAirports.length === 0) {
     showToast('warning', '⚠️ ' + (currentLang === 'ru' ? 'Выберите аэропорты' : 'Select airports'), '');
     return;
   }
-  
   state.searchCount++;
   localStorage.setItem('skyhunter_searches', state.searchCount);
   document.getElementById('statSearches').textContent = state.searchCount;
-  
-  showToast('info', '🔍 ' + translations[currentLang].toastSearchStarted, `${dest.name} • ${state.selectedAirports.length} аэропортов`);
+  showToast('info', '🔍 ' + (currentLang === 'ru' ? 'Поиск запущен' : 'Search started'), `${dest.name} • ${state.selectedAirports.length} аэропортов`);
   
   const modeMod = state.departureMode === 'morning' ? 0.95 : state.departureMode === 'evening' ? 0.88 : 1.0;
+  const totalPax = parseInt(document.getElementById('adults').value) + state.childrenCount;
   
   let flights = [];
   state.selectedAirports.forEach((code, idx) => {
     const apt = AIRPORTS.find(a => a.code === code);
     const airline = dest.airlines[idx % dest.airlines.length];
     const isLowcost = ['Ryanair','EasyJet','Wizz Air','Pegasus'].includes(airline);
-    const basePrice = Math.round(dest.basePrice * modeMod * (1 + idx * 0.05));
+    const basePrice = Math.round(dest.basePrice * modeMod * (1 + idx * 0.05) * totalPax / 4);
     const seed = idx * 137 + code.charCodeAt(0);
-    
     const depTime = generateFlightTime(state.departureMode, seed);
     const duration = generateDuration(dest.baseDuration, seed);
     const arrTime = calcArrival(depTime, duration);
-    
     const hacks = [];
     if (isLowcost) hacks.push('lowcost');
     if (idx === 0 && dest.basePrice < 50) hacks.push('mistake');
-    
     flights.push({
       from: code, fromName: apt.name,
       to: dest.code, toName: dest.name,
       airline, flight: `${airline.substring(0,2).toUpperCase()}${1000+idx*137}`,
-      price: basePrice, pricePerPerson: Math.round(basePrice / 4),
+      price: basePrice, pricePerPerson: Math.round(basePrice / totalPax),
       depTime, arrTime, duration,
-      stops: 'Прямой', hacks, visa: dest.visa,
+      stops: currentLang === 'ru' ? 'Прямой' : currentLang === 'en' ? 'Direct' : 'Direkt',
+      hacks, visa: dest.visa,
       parking: apt.parking, drive: apt.drive
     });
   });
-  
   flights.sort((a,b) => a.price - b.price);
-  renderResults(flights, dest);
-  renderCalendar(dest);
-  document.getElementById('calendarSection').style.display = 'block';
+  renderResults(flights);
 }
 
-function renderResults(flights, dest) {
+function renderResults(flights) {
   const list = document.getElementById('resultsList');
   document.getElementById('resultsCount').textContent = flights.length;
-  
   if (!flights.length) {
     list.innerHTML = `<div class="empty-state">
       <div class="empty-state-icon">😕</div>
@@ -1728,15 +1885,15 @@ function renderResults(flights, dest) {
     </div>`;
     return;
   }
-  
   list.innerHTML = flights.map((f, idx) => {
     const isCheapest = idx === 0;
     const modeEmoji = state.departureMode === 'morning' ? '🌅' : state.departureMode === 'day' ? '☀️' : state.departureMode === 'evening' ? '🌙' : '🎯';
     const visaText = f.visa === 'schengen' ? '✓ Шенген' : f.visa === 'no_visa' ? '✓ Без визы' : f.visa === 'no_visa_1year' ? '✓ 1 год' : '⚠️ Виза';
-    
+    const depLabel = translations[currentLang].departure;
+    const arrLabel = translations[currentLang].arrival;
     return `
       <div class="flight-card ${isCheapest ? 'cheapest' : ''}">
-        ${isCheapest ? `<div class="flight-card.cheapest-badge">${translations[currentLang].cheapest}</div>` : ''}
+        ${isCheapest ? `<div class="cheapest-badge">${translations[currentLang].cheapest}</div>` : ''}
         <div class="flight-card-top">
           <div class="flight-route-info">
             <div class="flight-airline">
@@ -1756,10 +1913,11 @@ function renderResults(flights, dest) {
             <div class="flight-price-per">~${f.pricePerPerson} CHF / чел</div>
           </div>
         </div>
+        
         <div class="flight-time-block">
-          <div class="time-point">
+          <div class="time-point departure">
             <div class="time-value">${f.depTime}</div>
-            <div class="time-label">${translations[currentLang].departure}</div>
+            <div class="time-label">${depLabel}</div>
             <div class="time-airport">${f.from}</div>
           </div>
           <div class="time-arrow">
@@ -1767,27 +1925,42 @@ function renderResults(flights, dest) {
             <div class="time-line"></div>
             <div class="time-stops">${f.stops}</div>
           </div>
-          <div class="time-point">
+          <div class="time-point arrival">
             <div class="time-value">${f.arrTime}</div>
-            <div class="time-label">${translations[currentLang].arrival}</div>
+            <div class="time-label">${arrLabel}</div>
             <div class="time-airport">${f.to}</div>
           </div>
         </div>
+        
+        <div class="flight-details-grid">
+          <div class="detail-item">
+            <span class="detail-label">${currentLang === 'ru' ? 'Парковка' : currentLang === 'en' ? 'Parking' : 'Parken'}</span>
+            <span class="detail-value">~${f.parking} CHF</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">${currentLang === 'ru' ? 'Из Туна' : currentLang === 'en' ? 'From Thun' : 'Ab Thun'}</span>
+            <span class="detail-value">${Math.round(f.drive/60)}ч ${f.drive%60}м</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">${currentLang === 'ru' ? 'Виза' : currentLang === 'en' ? 'Visa' : 'Visum'}</span>
+            <span class="detail-value" style="color:var(--success);">${visaText}</span>
+          </div>
+        </div>
+        
         <div class="flight-tags">
           ${f.hacks.includes('lowcost') ? '<span class="tag tag-lowcost">💸 LOWCOST</span>' : ''}
           ${f.hacks.includes('mistake') ? '<span class="tag tag-mistake">🔥 MISTAKE FARE</span>' : ''}
-          <span class="tag tag-visa">${visaText}</span>
           <span class="tag tag-mode">${modeEmoji} ${state.departureMode}</span>
         </div>
         <div class="flight-actions">
           <button class="action-btn primary" onclick="showToast('info','🔗','Переход на сайт авиакомпании')">
-            ${translations[currentLang].book}
+            ${currentLang === 'ru' ? 'Забронировать' : currentLang === 'en' ? 'Book' : 'Buchen'}
           </button>
-          <button class="action-btn" onclick="toggleFavorite('${f.flight}')">
-            ❤️ ${translations[currentLang].favorite}
+          <button class="action-btn" onclick="showToast('success','❤️','Добавлено в избранное')">
+            ❤️ ${currentLang === 'ru' ? 'В избранное' : currentLang === 'en' ? 'Favorite' : 'Favorit'}
           </button>
           <button class="action-btn" onclick="shareFlight('${f.from}','${f.to}','${f.price}')">
-            📤 ${translations[currentLang].share}
+            📤 ${currentLang === 'ru' ? 'Поделиться' : currentLang === 'en' ? 'Share' : 'Teilen'}
           </button>
         </div>
       </div>
@@ -1795,53 +1968,13 @@ function renderResults(flights, dest) {
   }).join('');
 }
 
-function renderCalendar(dest) {
-  const grid = document.getElementById('calendarGrid');
-  const today = new Date();
-  const days = [];
-  
-  for (let i = 0; i < 30; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() + i);
-    const price = Math.round(dest.basePrice * (0.7 + Math.sin(i * 0.5) * 0.3 + Math.random() * 0.3));
-    days.push({ date: d, price });
-  }
-  
-  const prices = days.map(d => d.price);
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
-  const range = max - min || 1;
-  const dayNames = currentLang === 'de' ? ['So','Mo','Di','Mi','Do','Fr','Sa'] :
-                   currentLang === 'en' ? ['Su','Mo','Tu','We','Th','Fr','Sa'] :
-                   ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-  
-  grid.innerHTML = days.map((d, i) => {
-    const heatLevel = Math.ceil((d.price - min) / range * 5);
-    const isBest = d.price === min;
-    return `
-      <div class="calendar-day heat-${heatLevel} ${isBest ? 'best' : ''}">
-        <div class="calendar-day-name">${dayNames[d.date.getDay()]}</div>
-        <div class="calendar-day-num">${d.date.getDate()}</div>
-        <div class="calendar-day-price">${d.price} CHF</div>
-      </div>
-    `;
-  }).join('');
-}
-
-function toggleFavorite(flight) {
-  showToast('success', '❤️ ' + translations[currentLang].toastAddedToFav, flight);
-}
-
 function shareFlight(from, to, price) {
+  const text = `${from} → ${to} за ${price} CHF — SkyHunter AI`;
   if (navigator.share) {
-    navigator.share({
-      title: 'SkyHunter AI — дешёвый рейс!',
-      text: `Нашёл рейс ${from} → ${to} за ${price} CHF на SkyHunter AI!`,
-      url: window.location.href
-    });
+    navigator.share({ title: 'SkyHunter AI', text, url: window.location.href });
   } else {
-    navigator.clipboard.writeText(`${from} → ${to} за ${price} CHF — SkyHunter AI`);
-    showToast('success', '📋', 'Скопировано в буфер обмена');
+    navigator.clipboard.writeText(text);
+    showToast('success', '📋', currentLang === 'ru' ? 'Скопировано' : 'Copied');
   }
 }
 
@@ -1857,7 +1990,11 @@ document.getElementById('themeToggle').addEventListener('click', () => {
 });
 
 document.querySelectorAll('.lang-btn').forEach(btn => {
-  btn.addEventListener('click', () => applyLanguage(btn.dataset.lang));
+  btn.addEventListener('click', () => {
+    applyLanguage(btn.dataset.lang);
+    renderChildrenList();
+    updateFromDisplay();
+  });
 });
 
 document.querySelectorAll('.mode-pill').forEach(pill => {
@@ -1875,30 +2012,22 @@ document.getElementById('radiusSlider').addEventListener('input', e => {
 document.getElementById('applyRadiusBtn').addEventListener('click', () => {
   state.radius = parseInt(document.getElementById('radiusSlider').value);
   calculateAirportsInRadius();
-  showToast('success', 
-    '📍 ' + translations[currentLang].toastLocationSet,
-    `${state.airportsInRadius.length} ${translations[currentLang].toastAirportsFound}`
-  );
+  showToast('success', '✅ ' + (currentLang === 'ru' ? 'Применено' : 'Applied'), `${state.airportsInRadius.length} ${currentLang === 'ru' ? 'аэропортов' : 'airports'}`);
 });
 
 document.getElementById('geoBtn').addEventListener('click', () => {
   const btn = document.getElementById('geoBtn');
   btn.classList.add('loading');
   btn.textContent = '⏳';
-  
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       pos => {
-        state.userLocation = { 
-          name: 'My Location', 
-          lat: pos.coords.latitude, 
-          lon: pos.coords.longitude 
-        };
-        document.getElementById('userLocation').value = `${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`;
+        state.userLocation = { name: 'My Location', lat: pos.coords.latitude, lon: pos.coords.longitude };
+        locationInput.value = `${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`;
         calculateAirportsInRadius();
         btn.classList.remove('loading');
         btn.textContent = '📍';
-        showToast('success', '📍 ' + translations[currentLang].toastLocationSet, '');
+        showToast('success', '📍 ' + (currentLang === 'ru' ? 'Локация установлена' : 'Location set'), '');
       },
       err => {
         btn.classList.remove('loading');
@@ -1926,35 +2055,25 @@ document.addEventListener('keydown', e => {
    INIT
    ═══════════════════════════════════════════════════════════════ */
 function init() {
-  // Load theme
   const savedTheme = localStorage.getItem('skyhunter_theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
   document.getElementById('themeIcon').textContent = savedTheme === 'light' ? '🌙' : '☀️';
-  
-  // Load language
   const savedLang = localStorage.getItem('skyhunter_lang') || 'ru';
   applyLanguage(savedLang);
-  
-  // Load stats
   state.searchCount = parseInt(localStorage.getItem('skyhunter_searches') || '0');
   document.getElementById('statSearches').textContent = state.searchCount;
-  
-  // Set default dates
   const today = new Date();
   const in7 = new Date(today); in7.setDate(in7.getDate() + 30);
   const in14 = new Date(today); in14.setDate(in14.getDate() + 37);
   document.getElementById('dateOut').value = in7.toISOString().split('T')[0];
   document.getElementById('dateBack').value = in14.toISOString().split('T')[0];
-  
-  // Calculate initial airports
   calculateAirportsInRadius();
-  
-  // Welcome toast
+  renderChildrenList();
   setTimeout(() => {
-    showToast('info', '🦅 SkyHunter AI v9.0', 
-      currentLang === 'ru' ? 'Добро пожаловать! Нажмите Ctrl+K для быстрого поиска' :
-      currentLang === 'en' ? 'Welcome! Press Ctrl+K for quick search' :
-      'Willkommen! Drücken Sie Ctrl+K für Schnellsuche');
+    showToast('info', '🦅 SkyHunter AI v9.1', 
+      currentLang === 'ru' ? 'Добро пожаловать! Ctrl+K — быстрый поиск' :
+      currentLang === 'en' ? 'Welcome! Ctrl+K for quick search' :
+      'Willkommen! Ctrl+K für Schnellsuche');
   }, 1000);
 }
 
