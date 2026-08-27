@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SkyHunter AI — Premium flight search with AI price prediction">
+<meta name="theme-color" content="#6366f1">
+<title>SkyHunter AI — Premium Flight Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — CSS VARIABLES
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-elevated: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #94a3b8;
+  --border-primary: #e2e8f0;
+  --border-secondary: #cbd5e1;
+  --accent-primary: #6366f1;
+  --accent-secondary: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1);
+  --shadow-glow: 0 0 40px rgba(99,102,241,0.3);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --transition-fast: 150ms cubic-bezier(0.4,0,0.2,1);
+  --transition-base: 250ms cubic-bezier(0.4,0,0.2,1);
+  --transition-slow: 400ms cubic-bezier(0.4,0,0.2,1);
+}
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-elevated: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #64748b;
+  --border-primary: #334155;
+  --border-secondary: #475569;
+  --shadow-glow: 0 0 40px rgba(99,102,241,0.5);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  transition: background var(--transition-base), color var(--transition-base);
+  overflow-x: hidden;
+}
+.container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes toastIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* ═══════════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════════ */
+.header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border-primary);
+}
+[data-theme="dark"] .header { background: rgba(15,23,42,0.8); }
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 0; gap: 24px;
+}
+.logo {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 800; font-size: 20px; text-decoration: none;
+  color: var(--text-primary);
+  transition: transform var(--transition-fast);
+}
+.logo:hover { transform: scale(1.05); }
+.logo-icon {
+  width: 40px; height: 40px;
+  background: var(--accent-gradient);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: var(--shadow-glow);
+}
+.logo-text {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.logo-version {
+  font-size: 10px; padding: 2px 8px;
+  background: var(--accent-gradient); color: white;
+  border-radius: var(--radius-full); font-weight: 700;
+}
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.lang-switcher {
+  display: flex; gap: 2px;
+  background: var(--bg-secondary);
+  padding: 4px; border-radius: var(--radius-full);
+  border: 1px solid var(--border-primary);
+}
+.lang-btn {
+  padding: 6px 12px; background: transparent; border: none;
+  border-radius: var(--radius-full);
+  font-size: 12px; font-weight: 600;
+  color: var(--text-secondary); cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.lang-btn:hover { color: var(--text-primary); }
+.lang-btn.active { background: var(--accent-gradient); color: white; }
+.theme-toggle, .kbd-btn {
+  width: 40px; height: 40px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-full);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 18px;
+  transition: all var(--transition-fast);
+}
+.theme-toggle:hover, .kbd-btn:hover {
+  transform: rotate(15deg) scale(1.1);
+  background: var(--bg-tertiary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════════════════ */
+.hero {
+  padding: 64px 0 48px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: -50%;
+  background: radial-gradient(circle at 30% 50%, rgba(99,102,241,0.1) 0%, transparent 50%),
+              radial-gradient(circle at 70% 50%, rgba(139,92,246,0.1) 0%, transparent 50%);
+  animation: float 20s ease-in-out infinite;
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px; background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-full);
+  font-size: 13px; font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  animation: fadeIn 0.6s var(--transition-base);
+}
+.hero-badge-dot {
+  width: 8px; height: 8px;
+  background: var(--success); border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+.hero-title {
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 900; line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  animation: slideUp 0.8s var(--transition-base);
+}
+.hero-title-gradient {
+  background: var(--accent-gradient);
+  background-size: 200% 200%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient 5s ease infinite;
+}
+.hero-subtitle {
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  animation: slideUp 1s var(--transition-base);
+}
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px; max-width: 700px; margin: 0 auto;
+  animation: slideUp 1.2s var(--transition-base);
+}
+.stat-card {
+  padding: 16px; background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+}
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent-primary);
+}
+.stat-value {
+  font-size: 28px; font-weight: 800;
+  font-family: var(--font-mono);
+  background: var(--accent-gradient);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.stat-label {
+  font-size: 12px; color: var(--text-tertiary);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOCATION SELECTOR (NEW!)
+   ═══════════════════════════════════════════════════════════════ */
+.location-section { padding: 0 0 32px; }
+.location-card {
+  background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(139,92,246,0.05));
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  position: relative; overflow: hidden;
+}
+.location-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+}
+.location-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+.location-icon {
+  width: 44px; height: 44px;
+  background: var(--accent-gradient);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.location-title { font-size: 18px; font-weight: 700; }
+.location-subtitle { font-size: 13px; color: var(--text-secondary); }
+.location-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 16px; align-items: end;
+}
+.location-input-wrap { position: relative; }
+.location-input {
+  width: 100%; padding: 14px 48px 14px 16px;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: 15px; color: var(--text-primary);
+  font-family: var(--font-sans);
+  transition: all var(--transition-fast);
+}
+.location-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 4px rgba(99,102,241,0.1);
+}
+.geo-btn {
+  position: absolute; right: 8px; top: 50%;
+  transform: translateY(-50%);
+  width: 36px; height: 36px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  cursor: pointer; font-size: 16px;
+  transition: all var(--transition-fast);
+  display: flex; align-items: center; justify-content: center;
+}
+.geo-btn:hover { background: var(--accent-gradient); color: white; }
+.geo-btn.loading { animation: spin 1s linear infinite; }
+.radius-wrap { display: flex; flex-direction: column; gap: 8px; }
+.radius-label {
+  font-size: 12px; font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+.radius-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  outline: none;
+}
+.radius-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px;
+  background: var(--accent-gradient);
+  border-radius: 50%; cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-fast);
+}
+.radius-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.radius-value {
+  font-family: var(--font-mono);
+  font-weight: 700; color: var(--accent-primary);
+  font-size: 14px;
+}
+.apply-radius-btn {
+  padding: 14px 24px;
+  background: var(--accent-gradient);
+  color: white; border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.apply-radius-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.airports-in-radius {
+  margin-top: 20px; padding: 16px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+}
+.airports-in-radius-title {
+  font-size: 13px; font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.airports-chips {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.airport-chip-new {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-full);
+  font-size: 12px; font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.airport-chip-new:hover {
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+}
+.airport-chip-new.selected {
+  background: var(--accent-gradient);
+  color: white; border-color: transparent;
+}
+.airport-chip-distance {
+  font-family: var(--font-mono);
+  font-size: 10px; opacity: 0.8;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SEARCH FORM (GLASSMORPHISM)
+   ═══════════════════════════════════════════════════════════════ */
+.search-section { padding: 0 0 32px; }
+.search-card {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-xl);
+  position: relative; overflow: hidden;
+}
+[data-theme="dark"] .search-card { background: rgba(30,41,59,0.7); }
+.search-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+}
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px; margin-bottom: 20px;
+}
+.form-field { display: flex; flex-direction: column; gap: 6px; position: relative; }
+.form-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.form-input {
+  padding: 12px 14px;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: 14px; color: var(--text-primary);
+  font-family: var(--font-sans);
+  transition: all var(--transition-fast);
+}
+.form-input:hover { border-color: var(--border-secondary); }
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 4px rgba(99,102,241,0.1);
+}
+.autocomplete-list {
+  position: absolute; top: 100%; left: 0; right: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  max-height: 280px; overflow-y: auto;
+  z-index: 100; box-shadow: var(--shadow-lg);
+  display: none;
+}
+.autocomplete-list.show { display: block; }
+.autocomplete-item {
+  padding: 10px 14px; cursor: pointer;
+  border-bottom: 1px solid var(--border-primary);
+  font-size: 13px;
+  transition: background var(--transition-fast);
+}
+.autocomplete-item:hover { background: var(--bg-secondary); }
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-city { font-weight: 600; color: var(--text-primary); }
+.autocomplete-info { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+.mode-pills {
+  display: flex; gap: 8px;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.mode-pill {
+  padding: 10px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-full);
+  font-size: 13px; font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.mode-pill:hover {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+.mode-pill.active {
+  background: var(--accent-gradient);
+  color: white; border-color: transparent;
+  box-shadow: var(--shadow-md);
+}
+.search-btn {
+  width: 100%; padding: 16px;
+  background: var(--accent-gradient);
+  color: white; border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px; font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  transition: all var(--transition-fast);
+  position: relative; overflow: hidden;
+}
+.search-btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+.search-btn:hover::before { transform: translateX(100%); }
+.search-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+}
+.search-btn-shortcut {
+  font-size: 11px; padding: 2px 8px;
+  background: rgba(255,255,255,0.2);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAP SECTION
+   ═══════════════════════════════════════════════════════════════ */
+.map-section { padding: 0 0 32px; }
+.map-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  position: relative; overflow: hidden;
+}
+.map-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+.map-title { font-size: 18px; font-weight: 700; }
+.map-legend {
+  display: flex; gap: 16px; font-size: 12px;
+  color: var(--text-secondary);
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.legend-dot.user { background: var(--accent-primary); }
+.legend-dot.airport { background: var(--success); }
+.legend-dot.radius { background: rgba(99,102,241,0.3); }
+.map-svg-wrap {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-primary);
+}
+.map-svg-wrap svg { display: block; width: 100%; height: auto; }
+.airport-marker {
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+.airport-marker:hover { transform: scale(1.3); }
+.airport-marker circle { transition: all var(--transition-fast); }
+.airport-marker.in-radius circle { fill: var(--success); }
+.airport-marker.out-radius circle { fill: var(--text-tertiary); opacity: 0.5; }
+.user-marker { animation: pulse 2s infinite; }
+.radius-circle {
+  fill: rgba(99,102,241,0.1);
+  stroke: var(--accent-primary);
+  stroke-width: 2;
+  stroke-dasharray: 5,5;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRICE CALENDAR (HEATMAP)
+   ═══════════════════════════════════════════════════════════════ */
+.calendar-section { padding: 0 0 32px; }
+.calendar-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+}
+.calendar-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+.calendar-title { font-size: 18px; font-weight: 700; }
+.calendar-legend {
+  display: flex; gap: 8px; font-size: 11px;
+  color: var(--text-secondary); align-items: center;
+}
+.legend-gradient {
+  width: 100px; height: 12px;
+  background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+  border-radius: var(--radius-full);
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.calendar-day {
+  aspect-ratio: 1;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: 8px;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative; overflow: hidden;
+}
+.calendar-day:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-primary);
+}
+.calendar-day.best {
+  background: var(--accent-gradient);
+  color: white; border-color: transparent;
+  box-shadow: var(--shadow-glow);
+}
+.calendar-day.best::after {
+  content: '⭐'; position: absolute;
+  top: 4px; right: 4px; font-size: 10px;
+}
+.calendar-day-num {
+  font-size: 14px; font-weight: 700;
+  font-family: var(--font-mono);
+}
+.calendar-day-name {
+  font-size: 10px; opacity: 0.7;
+  text-transform: uppercase;
+}
+.calendar-day-price {
+  font-size: 11px; font-weight: 600;
+  font-family: var(--font-mono);
+}
+.heat-1 { background: #10b981 !important; color: white !important; }
+.heat-2 { background: #34d399 !important; color: white !important; }
+.heat-3 { background: #fbbf24 !important; color: #0f172a !important; }
+.heat-4 { background: #f59e0b !important; color: white !important; }
+.heat-5 { background: #ef4444 !important; color: white !important; }
+
+/* ═══════════════════════════════════════════════════════════════
+   RESULTS LAYOUT
+   ═══════════════════════════════════════════════════════════════ */
+.results-section { padding: 0 0 32px; }
+.results-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+.filters-panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  height: fit-content;
+  position: sticky; top: 80px;
+}
+.filter-group { margin-bottom: 20px; }
+.filter-group:last-child { margin-bottom: 0; }
+.filter-title {
+  font-size: 12px; font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+.price-range {
+  display: flex; justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 13px; font-weight: 600;
+  color: var(--accent-primary);
+  margin-bottom: 8px;
+}
+.filter-checkbox {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0; cursor: pointer;
+  font-size: 13px;
+}
+.filter-checkbox input {
+  width: 16px; height: 16px;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+.results-panel { display: flex; flex-direction: column; gap: 16px; }
+.results-header-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+}
+.results-count {
+  font-size: 14px; color: var(--text-secondary);
+}
+.results-count strong { color: var(--text-primary); }
+.sort-select {
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FLIGHT CARDS (PREMIUM)
+   ═══════════════════════════════════════════════════════════════ */
+.flight-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  transition: all var(--transition-base);
+  position: relative; overflow: hidden;
+}
+.flight-card::before {
+  content: ''; position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px; background: var(--accent-gradient);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+.flight-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--accent-primary);
+}
+.flight-card:hover::before { opacity: 1; }
+.flight-card.cheapest { border-color: var(--success); }
+.flight-card.cheapest::before { background: var(--success); opacity: 1; }
+.flight-card.cheapest-badge {
+  position: absolute; top: 16px; right: 16px;
+  padding: 4px 10px;
+  background: var(--success);
+  color: white;
+  border-radius: var(--radius-full);
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase;
+}
+.flight-card-top {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 16px;
+  margin-bottom: 16px;
+}
+.flight-route-info { flex: 1; }
+.flight-airline {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.flight-airline-logo {
+  width: 24px; height: 24px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+.flight-route {
+  font-size: 18px; font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.flight-meta {
+  display: flex; gap: 12px;
+  font-size: 12px; color: var(--text-tertiary);
+  flex-wrap: wrap;
+}
+.flight-price-block { text-align: right; }
+.flight-price {
+  font-size: 28px; font-weight: 800;
+  font-family: var(--font-mono);
+  background: var(--accent-gradient);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+.flight-price-per {
+  font-size: 11px; color: var(--text-tertiary);
+  margin-top: 4px;
+}
+.flight-time-block {
+  display: flex; align-items: center;
+  gap: 16px; padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+}
+.time-point {
+  display: flex; flex-direction: column;
+  align-items: center; min-width: 80px;
+}
+.time-value {
+  font-size: 24px; font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  line-height: 1;
+}
+.time-label {
+  font-size: 10px; color: var(--text-tertiary);
+  text-transform: uppercase; margin-top: 4px;
+}
+.time-airport {
+  font-size: 11px; color: var(--accent-primary);
+  font-weight: 600; margin-top: 2px;
+}
+.time-arrow {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+}
+.time-duration {
+  font-size: 11px; font-weight: 600;
+  color: var(--accent-primary);
+  background: var(--bg-primary);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+}
+.time-line {
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+  position: relative; border-radius: 2px;
+}
+.time-line::after {
+  content: '✈️'; position: absolute;
+  right: -4px; top: -10px; font-size: 16px;
+}
+.time-stops {
+  font-size: 10px; color: var(--text-tertiary);
+}
+.flight-tags {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.tag {
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 10px; font-weight: 600;
+}
+.tag-lowcost { background: rgba(59,130,246,0.1); color: var(--info); }
+.tag-split { background: rgba(245,158,11,0.1); color: var(--warning); }
+.tag-mistake { background: rgba(239,68,68,0.1); color: var(--danger); }
+.tag-visa { background: rgba(16,185,129,0.1); color: var(--success); }
+.tag-mode { background: var(--accent-gradient); color: white; }
+.flight-actions {
+  display: flex; gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-primary);
+}
+.action-btn {
+  flex: 1; padding: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: 12px; font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.action-btn:hover {
+  background: var(--accent-gradient);
+  color: white; border-color: transparent;
+  transform: translateY(-2px);
+}
+.action-btn.primary {
+  background: var(--accent-gradient);
+  color: white; border-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS
+   ═══════════════════════════════════════════════════════════════ */
+.toast-container {
+  position: fixed; bottom: 24px; right: 24px;
+  z-index: 2000;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.toast {
+  padding: 14px 20px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  display: flex; align-items: center; gap: 12px;
+  min-width: 280px; max-width: 400px;
+  animation: toastIn 0.4s var(--transition-base);
+}
+.toast-icon {
+  width: 32px; height: 32px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.toast.success .toast-icon { background: rgba(16,185,129,0.1); color: var(--success); }
+.toast.warning .toast-icon { background: rgba(245,158,11,0.1); color: var(--warning); }
+.toast.info .toast-icon { background: rgba(59,130,246,0.1); color: var(--info); }
+.toast-content { flex: 1; }
+.toast-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.toast-message { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   EMPTY STATE
+   ═══════════════════════════════════════════════════════════════ */
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  color: var(--text-tertiary);
+}
+.empty-state-icon {
+  font-size: 80px; margin-bottom: 16px;
+  opacity: 0.3;
+}
+.empty-state-title {
+  font-size: 20px; font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.empty-state-text { font-size: 14px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════════ */
+.footer {
+  padding: 32px 0;
+  border-top: 1px solid var(--border-primary);
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+.footer a {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .results-layout { grid-template-columns: 1fr; }
+  .filters-panel { position: static; }
+}
+@media (max-width: 768px) {
+  .header-inner { flex-wrap: wrap; }
+  .profile-name { display: none; }
+  .location-grid { grid-template-columns: 1fr; }
+  .hero-title { font-size: 36px; }
+  .calendar-grid { grid-template-columns: repeat(4, 1fr); }
+  .flight-card-top { flex-direction: column; }
+  .flight-price-block { text-align: left; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════════ -->
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">🦅</div>
+        <span class="logo-text">SkyHunter AI</span>
+        <span class="logo-version">v9.0</span>
+      </a>
+      <div class="header-actions">
+        <div class="lang-switcher">
+          <button class="lang-btn active" data-lang="ru">RU</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="de">DE</button>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Ctrl+D">
+          <span id="themeIcon">🌙</span>
+        </button>
+        <button class="kbd-btn" id="kbdBtn" title="Ctrl+K">⌨️</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        <span data-i18n="heroBadge">AI-анализ 35+ направлений в реальном времени</span>
+      </div>
+      <h1 class="hero-title">
+        <span data-i18n="heroTitle1">Найди самые дешёвые</span><br>
+        <span class="hero-title-gradient" data-i18n="heroTitle2">авиабилеты в Европе</span>
+      </h1>
+      <p class="hero-subtitle" data-i18n="heroSubtitle">
+        Премиум AI-поиск с прогнозом цен, интерактивной картой и мультиязычным интерфейсом
+      </p>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <div class="stat-value">35+</div>
+          <div class="stat-label" data-i18n="statRoutes">Направлений</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">18</div>
+          <div class="stat-label" data-i18n="statAirports">Аэропортов</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statSaved">0 CHF</div>
+          <div class="stat-label" data-i18n="statSaved">Сэкономлено</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statSearches">0</div>
+          <div class="stat-label" data-i18n="statSearches">Поисков</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LOCATION SELECTOR (NEW!)
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="location-section">
+  <div class="container">
+    <div class="location-card">
+      <div class="location-header">
+        <div class="location-icon">📍</div>
+        <div>
+          <div class="location-title" data-i18n="locTitle">Ваше местоположение</div>
+          <div class="location-subtitle" data-i18n="locSubtitle">Выберите город и радиус поиска аэропортов</div>
+        </div>
+      </div>
+      <div class="location-grid">
+        <div class="location-input-wrap">
+          <input type="text" class="location-input" id="userLocation" 
+                 placeholder="Например: Тун, Bern, Zurich..." 
+                 value="Тун, Швейцария">
+          <button class="geo-btn" id="geoBtn" title="Определить автоматически">📍</button>
+        </div>
+        <div class="radius-wrap">
+          <div class="radius-label" data-i18n="radiusLabel">Радиус поиска</div>
+          <input type="range" class="radius-slider" id="radiusSlider" 
+                 min="50" max="500" step="50" value="300">
+          <div class="radius-value"><span id="radiusValue">300</span> km</div>
+        </div>
+        <button class="apply-radius-btn" id="applyRadiusBtn" data-i18n="applyBtn">
+          Применить
+        </button>
+      </div>
+      <div class="airports-in-radius">
+        <div class="airports-in-radius-title">
+          <span data-i18n="airportsFound">Найдено аэропортов:</span>
+          <strong id="airportsCount">0</strong>
+        </div>
+        <div class="airports-chips" id="airportsChips"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SEARCH FORM
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="search-section">
+  <div class="container">
+    <div class="search-card">
+      <div class="search-grid">
+        <div class="form-field">
+          <label class="form-label" data-i18n="fromLabel">🛫 Откуда</label>
+          <input type="text" class="form-input" id="fromInput" 
+                 placeholder="Авто из локации" readonly>
+        </div>
+        <div class="form-field">
+          <label class="form-label" data-i18n="toLabel">🛬 Куда</label>
+          <input type="text" class="form-input" id="toInput" 
+                 placeholder="Барселона, Тбилиси..." autocomplete="off">
+          <div class="autocomplete-list" id="autocompleteList"></div>
+        </div>
+        <div class="form-field">
+          <label class="form-label" data-i18n="dateOutLabel">📅 Вылет</label>
+          <input type="date" class="form-input" id="dateOut">
+        </div>
+        <div class="form-field">
+          <label class="form-label" data-i18n="dateBackLabel">📅 Возврат</label>
+          <input type="date" class="form-input" id="dateBack">
+        </div>
+        <div class="form-field">
+          <label class="form-label" data-i18n="paxLabel">👥 Пассажиры</label>
+          <select class="form-input" id="passengers">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label" data-i18n="baggageLabel">🧳 Багаж</label>
+          <select class="form-input" id="baggage">
+            <option value="0" data-i18n="noBag">Без багажа</option>
+            <option value="1">1 × 23 кг</option>
+            <option value="2">2 × 23 кг</option>
+            <option value="3">3 × 23 кг</option>
+            <option value="4" selected>4 × 23 кг</option>
+          </select>
+        </div>
+      </div>
+      <div class="mode-pills">
+        <button class="mode-pill active" data-mode="any" data-i18n="modeAny">🎯 Любое время</button>
+        <button class="mode-pill" data-mode="morning" data-i18n="modeMorning">🌅 Утро (до 12:00)</button>
+        <button class="mode-pill" data-mode="day" data-i18n="modeDay">☀️ День (12-22)</button>
+        <button class="mode-pill" data-mode="evening" data-i18n="modeEvening">🌙 Вечер (после 22)</button>
+      </div>
+      <button class="search-btn" id="searchBtn">
+        <span data-i18n="searchBtn">🔍 Найти лучшие предложения</span>
+        <span class="search-btn-shortcut">Ctrl+K</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MAP
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="map-section">
+  <div class="container">
+    <div class="map-card">
+      <div class="map-header">
+        <div class="map-title" data-i18n="mapTitle">🗺️ Карта аэропортов</div>
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot user"></div><span data-i18n="legendYou">Вы</span></div>
+          <div class="legend-item"><div class="legend-dot airport"></div><span data-i18n="legendAirport">В радиусе</span></div>
+          <div class="legend-item"><div class="legend-dot radius"></div><span data-i18n="legendRadius">Радиус</span></div>
+        </div>
+      </div>
+      <div class="map-svg-wrap">
+        <svg id="europeMap" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+          <!-- Simplified Europe outline -->
+          <path d="M 100 150 Q 150 100 250 120 L 350 100 Q 450 110 550 130 L 650 150 Q 700 200 680 280 L 650 350 Q 600 400 500 420 L 400 430 Q 300 420 200 400 L 150 350 Q 100 300 110 230 Z" 
+                fill="var(--bg-tertiary)" stroke="var(--border-primary)" stroke-width="1" opacity="0.5"/>
+          <!-- Radius circle (dynamic) -->
+          <circle id="radiusCircle" class="radius-circle" cx="400" cy="250" r="100"/>
+          <!-- User marker (dynamic) -->
+          <g id="userMarker" class="user-marker" transform="translate(400,250)">
+            <circle r="12" fill="var(--accent-primary)" opacity="0.3"/>
+            <circle r="6" fill="var(--accent-primary)"/>
+          </g>
+          <!-- Airport markers (dynamic) -->
+          <g id="airportMarkers"></g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PRICE CALENDAR
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="calendar-section" id="calendarSection" style="display:none;">
+  <div class="container">
+    <div class="calendar-card">
+      <div class="calendar-header">
+        <div class="calendar-title" data-i18n="calendarTitle">📅 Календарь цен (30 дней)</div>
+        <div class="calendar-legend">
+          <span data-i18n="cheap">Дёшево</span>
+          <div class="legend-gradient"></div>
+          <span data-i18n="expensive">Дорого</span>
+        </div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     RESULTS
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="results-section">
+  <div class="container">
+    <div class="results-layout">
+      <!-- Filters -->
+      <aside class="filters-panel">
+        <div class="filter-group">
+          <div class="filter-title" data-i18n="filterPrice">💰 Цена (CHF)</div>
+          <div class="price-range">
+            <span id="priceMin">0</span>
+            <span id="priceMax">2000</span>
+          </div>
+          <input type="range" class="radius-slider" id="priceFilter" 
+                 min="0" max="2000" step="50" value="2000">
+        </div>
+        <div class="filter-group">
+          <div class="filter-title" data-i18n="filterStops">🔄 Пересадки</div>
+          <label class="filter-checkbox">
+            <input type="checkbox" checked> <span data-i18n="direct">Прямые</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" checked> <span data-i18n="oneStop">1 пересадка</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox"> <span data-i18n="twoPlus">2+ пересадки</span>
+          </label>
+        </div>
+        <div class="filter-group">
+          <div class="filter-title" data-i18n="filterAirlines">✈️ Авиакомпании</div>
+          <label class="filter-checkbox"><input type="checkbox" checked> Ryanair</label>
+          <label class="filter-checkbox"><input type="checkbox" checked> EasyJet</label>
+          <label class="filter-checkbox"><input type="checkbox" checked> Wizz Air</label>
+          <label class="filter-checkbox"><input type="checkbox" checked> SWISS</label>
+          <label class="filter-checkbox"><input type="checkbox" checked> Lufthansa</label>
+          <label class="filter-checkbox"><input type="checkbox" checked> Pegasus</label>
+        </div>
+        <div class="filter-group">
+          <div class="filter-title" data-i18n="filterFeatures">✨ Особенности</div>
+          <label class="filter-checkbox">
+            <input type="checkbox" id="filterLowcost"> <span data-i18n="onlyLowcost">Только лоукосты</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" id="filterDirect"> <span data-i18n="onlyDirect">Только прямые</span>
+          </label>
+        </div>
+      </aside>
+
+      <!-- Results -->
+      <div class="results-panel">
+        <div class="results-header-bar">
+          <div class="results-count">
+            <strong id="resultsCount">0</strong> <span data-i18n="resultsFound">рейсов найдено</span>
+          </div>
+          <select class="sort-select" id="sortSelect">
+            <option value="price" data-i18n="sortPrice">Сортировка: по цене ↑</option>
+            <option value="duration" data-i18n="sortDuration">По длительности</option>
+            <option value="departure" data-i18n="sortDeparture">По времени вылета</option>
+          </select>
+        </div>
+        <div id="resultsList">
+          <div class="empty-state">
+            <div class="empty-state-icon">🔍</div>
+            <div class="empty-state-title" data-i18n="emptyTitle">Начните поиск</div>
+            <div class="empty-state-text" data-i18n="emptyText">
+              Укажите направление и даты, затем нажмите «Найти»
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <p>SkyHunter AI v9.0 • <span data-i18n="footerMade">Сделано с</span> ❤️ <span data-i18n="footerFor">для путешественников</span></p>
+    <p style="margin-top:8px;font-size:11px;">
+      <span data-i18n="footerDisclaimer">Информация о ценах, визах и рейсах может меняться. Проверяйте на официальных сайтах.</span>
+    </p>
+  </div>
+</footer>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   I18N — TRANSLATIONS
+   ═══════════════════════════════════════════════════════════════ */
+const translations = {
+  ru: {
+    heroBadge: 'AI-анализ 35+ направлений в реальном времени',
+    heroTitle1: 'Найди самые дешёвые',
+    heroTitle2: 'авиабилеты в Европе',
+    heroSubtitle: 'Премиум AI-поиск с прогнозом цен, интерактивной картой и мультиязычным интерфейсом',
+    statRoutes: 'Направлений', statAirports: 'Аэропортов', statSaved: 'Сэкономлено', statSearches: 'Поисков',
+    locTitle: 'Ваше местоположение',
+    locSubtitle: 'Выберите город и радиус поиска аэропортов',
+    radiusLabel: 'Радиус поиска',
+    applyBtn: 'Применить',
+    airportsFound: 'Найдено аэропортов:',
+    fromLabel: '🛫 Откуда', toLabel: '🛬 Куда',
+    dateOutLabel: '📅 Вылет', dateBackLabel: '📅 Возврат',
+    paxLabel: '👥 Пассажиры', baggageLabel: '🧳 Багаж',
+    noBag: 'Без багажа',
+    modeAny: '🎯 Любое время', modeMorning: '🌅 Утро (до 12:00)',
+    modeDay: '☀️ День (12-22)', modeEvening: '🌙 Вечер (после 22)',
+    searchBtn: '🔍 Найти лучшие предложения',
+    mapTitle: '🗺️ Карта аэропортов',
+    legendYou: 'Вы', legendAirport: 'В радиусе', legendRadius: 'Радиус',
+    calendarTitle: '📅 Календарь цен (30 дней)',
+    cheap: 'Дёшево', expensive: 'Дорого',
+    filterPrice: '💰 Цена (CHF)', filterStops: '🔄 Пересадки',
+    direct: 'Прямые', oneStop: '1 пересадка', twoPlus: '2+ пересадки',
+    filterAirlines: '✈️ Авиакомпании', filterFeatures: '✨ Особенности',
+    onlyLowcost: 'Только лоукосты', onlyDirect: 'Только прямые',
+    resultsFound: 'рейсов найдено',
+    sortPrice: 'Сортировка: по цене ↑',
+    sortDuration: 'По длительности',
+    sortDeparture: 'По времени вылета',
+    emptyTitle: 'Начните поиск',
+    emptyText: 'Укажите направление и даты, затем нажмите «Найти»',
+    footerMade: 'Сделано с', footerFor: 'для путешественников',
+    footerDisclaimer: 'Информация о ценах, визах и рейсах может меняться. Проверяйте на официальных сайтах.',
+    toastLocationSet: 'Локация установлена',
+    toastAirportsFound: 'аэропортов в радиусе',
+    toastSearchStarted: 'Поиск запущен',
+    toastAddedToFav: 'Добавлено в избранное',
+    cheapest: 'САМЫЙ ДЕШЁВЫЙ',
+    from: 'из', to: 'в', departure: 'Вылет', arrival: 'Прилёт',
+    direct_flight: 'Прямой', stops: 'пересадок',
+    book: 'Забронировать', favorite: 'В избранное', compare: 'Сравнить', share: 'Поделиться'
+  },
+  en: {
+    heroBadge: 'AI analysis of 35+ destinations in real-time',
+    heroTitle1: 'Find the cheapest',
+    heroTitle2: 'flights in Europe',
+    heroSubtitle: 'Premium AI search with price prediction, interactive map and multilingual interface',
+    statRoutes: 'Destinations', statAirports: 'Airports', statSaved: 'Saved', statSearches: 'Searches',
+    locTitle: 'Your location',
+    locSubtitle: 'Choose city and airport search radius',
+    radiusLabel: 'Search radius',
+    applyBtn: 'Apply',
+    airportsFound: 'Airports found:',
+    fromLabel: '🛫 From', toLabel: '🛬 To',
+    dateOutLabel: '📅 Departure', dateBackLabel: '📅 Return',
+    paxLabel: '👥 Passengers', baggageLabel: '🧳 Baggage',
+    noBag: 'No baggage',
+    modeAny: '🎯 Any time', modeMorning: '🌅 Morning (before 12)',
+    modeDay: '☀️ Day (12-22)', modeEvening: '🌙 Evening (after 22)',
+    searchBtn: '🔍 Find best deals',
+    mapTitle: '🗺️ Airport map',
+    legendYou: 'You', legendAirport: 'In radius', legendRadius: 'Radius',
+    calendarTitle: '📅 Price calendar (30 days)',
+    cheap: 'Cheap', expensive: 'Expensive',
+    filterPrice: '💰 Price (CHF)', filterStops: '🔄 Stops',
+    direct: 'Direct', oneStop: '1 stop', twoPlus: '2+ stops',
+    filterAirlines: '✈️ Airlines', filterFeatures: '✨ Features',
+    onlyLowcost: 'Low-cost only', onlyDirect: 'Direct only',
+    resultsFound: 'flights found',
+    sortPrice: 'Sort: by price ↑',
+    sortDuration: 'By duration',
+    sortDeparture: 'By departure time',
+    emptyTitle: 'Start search',
+    emptyText: 'Enter destination and dates, then click "Find"',
+    footerMade: 'Made with', footerFor: 'for travelers',
+    footerDisclaimer: 'Prices, visas and flights may change. Check official websites.',
+    toastLocationSet: 'Location set',
+    toastAirportsFound: 'airports in radius',
+    toastSearchStarted: 'Search started',
+    toastAddedToFav: 'Added to favorites',
+    cheapest: 'CHEAPEST',
+    from: 'from', to: 'to', departure: 'Departure', arrival: 'Arrival',
+    direct_flight: 'Direct', stops: 'stops',
+    book: 'Book', favorite: 'Favorite', compare: 'Compare', share: 'Share'
+  },
+  de: {
+    heroBadge: 'KI-Analyse von 35+ Zielen in Echtzeit',
+    heroTitle1: 'Finde die günstigsten',
+    heroTitle2: 'Flüge in Europa',
+    heroSubtitle: 'Premium-KI-Suche mit Preisvorhersage, interaktiver Karte und mehrsprachiger Oberfläche',
+    statRoutes: 'Ziele', statAirports: 'Flughäfen', statSaved: 'Gespart', statSearches: 'Suchen',
+    locTitle: 'Ihr Standort',
+    locSubtitle: 'Wählen Sie Stadt und Suchradius für Flughäfen',
+    radiusLabel: 'Suchradius',
+    applyBtn: 'Anwenden',
+    airportsFound: 'Flughäfen gefunden:',
+    fromLabel: '🛫 Von', toLabel: '🛬 Nach',
+    dateOutLabel: '📅 Abflug', dateBackLabel: '📅 Rückkehr',
+    paxLabel: '👥 Passagiere', baggageLabel: '🧳 Gepäck',
+    noBag: 'Ohne Gepäck',
+    modeAny: '🎯 Jede Zeit', modeMorning: '🌅 Morgen (vor 12)',
+    modeDay: '☀️ Tag (12-22)', modeEvening: '🌙 Abend (nach 22)',
+    searchBtn: '🔍 Beste Angebote finden',
+    mapTitle: '🗺️ Flughafenkarte',
+    legendYou: 'Sie', legendAirport: 'Im Radius', legendRadius: 'Radius',
+    calendarTitle: '📅 Preiskalender (30 Tage)',
+    cheap: 'Günstig', expensive: 'Teuer',
+    filterPrice: '💰 Preis (CHF)', filterStops: '🔄 Zwischenstopps',
+    direct: 'Direkt', oneStop: '1 Stopp', twoPlus: '2+ Stopps',
+    filterAirlines: '✈️ Fluggesellschaften', filterFeatures: '✨ Merkmale',
+    onlyLowcost: 'Nur Billigflieger', onlyDirect: 'Nur Direkt',
+    resultsFound: 'Flüge gefunden',
+    sortPrice: 'Sortierung: nach Preis ↑',
+    sortDuration: 'Nach Dauer',
+    sortDeparture: 'Nach Abflugzeit',
+    emptyTitle: 'Suche starten',
+    emptyText: 'Geben Sie Ziel und Daten ein, dann klicken Sie "Finden"',
+    footerMade: 'Gemacht mit', footerFor: 'für Reisende',
+    footerDisclaimer: 'Preise, Visa und Flüge können sich ändern. Prüfen Sie offizielle Websites.',
+    toastLocationSet: 'Standort festgelegt',
+    toastAirportsFound: 'Flughäfen im Radius',
+    toastSearchStarted: 'Suche gestartet',
+    toastAddedToFav: 'Zu Favoriten hinzugefügt',
+    cheapest: 'AM GÜNSTIGSTEN',
+    from: 'von', to: 'nach', departure: 'Abflug', arrival: 'Ankunft',
+    direct_flight: 'Direkt', stops: 'Stopps',
+    book: 'Buchen', favorite: 'Favorit', compare: 'Vergleichen', share: 'Teilen'
+  }
+};
+
+let currentLang = 'ru';
+
+function applyLanguage(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang][key]) el.textContent = translations[lang][key];
+  });
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+  localStorage.setItem('skyhunter_lang', lang);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   AIRPORTS DATABASE WITH COORDINATES
+   ═══════════════════════════════════════════════════════════════ */
+const AIRPORTS = [
+  { code: 'ZRH', name: 'Цюрих', lat: 47.46, lon: 8.55, country: 'CH', parking: 180, drive: 75 },
+  { code: 'BSL', name: 'Базель', lat: 47.59, lon: 7.53, country: 'CH', parking: 110, drive: 75 },
+  { code: 'GVA', name: 'Женева', lat: 46.24, lon: 6.11, country: 'CH', parking: 130, drive: 150 },
+  { code: 'MXP', name: 'Милан MXP', lat: 45.63, lon: 8.72, country: 'IT', parking: 70, drive: 180 },
+  { code: 'BGY', name: 'Милан BGY', lat: 45.67, lon: 9.70, country: 'IT', parking: 65, drive: 210 },
+  { code: 'STR', name: 'Штутгарт', lat: 48.69, lon: 9.22, country: 'DE', parking: 80, drive: 150 },
+  { code: 'MUC', name: 'Мюнхен', lat: 48.35, lon: 11.78, country: 'DE', parking: 90, drive: 240 },
+  { code: 'SXB', name: 'Страсбург', lat: 48.54, lon: 7.63, country: 'FR', parking: 60, drive: 150 },
+  { code: 'FKB', name: 'Карлсруэ', lat: 48.90, lon: 8.08, country: 'DE', parking: 70, drive: 120 },
+  { code: 'LYS', name: 'Лион', lat: 45.72, lon: 5.08, country: 'FR', parking: 85, drive: 210 },
+  { code: 'FDH', name: 'Фридрихсхафен', lat: 47.67, lon: 9.51, country: 'DE', parking: 50, drive: 90 },
+  { code: 'FMM', name: 'Мемминген', lat: 47.99, lon: 10.24, country: 'DE', parking: 60, drive: 210 },
+  { code: 'NUE', name: 'Нюрнберг', lat: 49.50, lon: 11.08, country: 'DE', parking: 75, drive: 240 },
+  { code: 'FRA', name: 'Франкфурт', lat: 50.03, lon: 8.57, country: 'DE', parking: 100, drive: 270 },
+  { code: 'BLQ', name: 'Болонья', lat: 44.53, lon: 11.29, country: 'IT', parking: 75, drive: 270 },
+  { code: 'VCE', name: 'Венеция', lat: 45.50, lon: 12.35, country: 'IT', parking: 80, drive: 300 },
+  { code: 'NCE', name: 'Ницца', lat: 43.66, lon: 7.22, country: 'FR', parking: 85, drive: 300 },
+  { code: 'INN', name: 'Инсбрук', lat: 47.26, lon: 11.34, country: 'AT', parking: 90, drive: 210 }
+];
+
+const USER_LOCATIONS = {
+  'Тун': { lat: 46.76, lon: 7.63 },
+  'Thun': { lat: 46.76, lon: 7.63 },
+  'Bern': { lat: 46.95, lon: 7.45 },
+  'Берн': { lat: 46.95, lon: 7.45 },
+  'Zurich': { lat: 47.37, lon: 8.54 },
+  'Цюрих': { lat: 47.37, lon: 8.54 },
+  'Basel': { lat: 47.56, lon: 7.59 },
+  'Базель': { lat: 47.56, lon: 7.59 },
+  'Geneva': { lat: 46.20, lon: 6.14 },
+  'Женева': { lat: 46.20, lon: 6.14 }
+};
+
+const DESTINATIONS = [
+  { keywords: ['тенерифе','tenerife','teneriffa','tfs'], code: 'TFS', name: 'Тенерифе', country: 'Испания', basePrice: 45, baseDuration: 270, airlines: ['Wizz Air','Ryanair','EasyJet'], visa: 'schengen' },
+  { keywords: ['пальма','майорка','palma','pmi'], code: 'PMI', name: 'Пальма-де-Майорка', country: 'Испания', basePrice: 50, baseDuration: 170, airlines: ['EasyJet','Ryanair'], visa: 'schengen' },
+  { keywords: ['барселона','barcelona','bcn'], code: 'BCN', name: 'Барселона', country: 'Испания', basePrice: 55, baseDuration: 150, airlines: ['Vueling','Ryanair','EasyJet'], visa: 'schengen' },
+  { keywords: ['мадрид','madrid','mad'], code: 'MAD', name: 'Мадрид', country: 'Испания', basePrice: 60, baseDuration: 170, airlines: ['Iberia','Ryanair'], visa: 'schengen' },
+  { keywords: ['малага','malaga','agp'], code: 'AGP', name: 'Малага', country: 'Испания', basePrice: 55, baseDuration: 170, airlines: ['Ryanair','EasyJet'], visa: 'schengen' },
+  { keywords: ['рим','rome','fco'], code: 'FCO', name: 'Рим', country: 'Италия', basePrice: 50, baseDuration: 130, airlines: ['Wizz Air','Ryanair'], visa: 'schengen' },
+  { keywords: ['неаполь','naples','nap'], code: 'NAP', name: 'Неаполь', country: 'Италия', basePrice: 60, baseDuration: 140, airlines: ['Wizz Air','Ryanair'], visa: 'schengen' },
+  { keywords: ['варшава','warsaw','waw'], code: 'WAW', name: 'Варшава', country: 'Польша', basePrice: 40, baseDuration: 130, airlines: ['Wizz Air','LOT'], visa: 'schengen' },
+  { keywords: ['краков','krakow','krk'], code: 'KRK', name: 'Краков', country: 'Польша', basePrice: 35, baseDuration: 120, airlines: ['Wizz Air','Ryanair'], visa: 'schengen' },
+  { keywords: ['тбилиси','tbilisi','tbs'], code: 'TBS', name: 'Тбилиси', country: 'Грузия', basePrice: 90, baseDuration: 240, airlines: ['Georgian Airways','Wizz Air'], visa: 'no_visa_1year' },
+  { keywords: ['батуми','batumi','bus'], code: 'BUS', name: 'Батуми', country: 'Грузия', basePrice: 95, baseDuration: 250, airlines: ['Georgian Airways','Wizz Air'], visa: 'no_visa_1year' },
+  { keywords: ['стамбул','istanbul','ist'], code: 'IST', name: 'Стамбул', country: 'Турция', basePrice: 80, baseDuration: 200, airlines: ['Turkish','Pegasus'], visa: 'no_visa' },
+  { keywords: ['анталья','antalya','ayt'], code: 'AYT', name: 'Анталья', country: 'Турция', basePrice: 85, baseDuration: 220, airlines: ['Pegasus','SunExpress'], visa: 'no_visa' },
+  { keywords: ['афины','athens','ath'], code: 'ATH', name: 'Афины', country: 'Греция', basePrice: 70, baseDuration: 180, airlines: ['Aegean','Ryanair'], visa: 'schengen' },
+  { keywords: ['лиссабон','lisbon','lis'], code: 'LIS', name: 'Лиссабон', country: 'Португалия', basePrice: 75, baseDuration: 220, airlines: ['TAP','Ryanair'], visa: 'schengen' },
+  { keywords: ['париж','paris','cdg'], code: 'CDG', name: 'Париж', country: 'Франция', basePrice: 55, baseDuration: 100, airlines: ['Air France','EasyJet'], visa: 'schengen' },
+  { keywords: ['лондон','london','lgw'], code: 'LGW', name: 'Лондон', country: 'UK', basePrice: 65, baseDuration: 130, airlines: ['EasyJet','British Airways'], visa: 'visa_required' },
+  { keywords: ['амстердам','amsterdam','ams'], code: 'AMS', name: 'Амстердам', country: 'Нидерланды', basePrice: 60, baseDuration: 100, airlines: ['KLM','EasyJet'], visa: 'schengen' },
+  { keywords: ['прага','prague','prg'], code: 'PRG', name: 'Прага', country: 'Чехия', basePrice: 45, baseDuration: 90, airlines: ['Wizz Air','Ryanair'], visa: 'schengen' },
+  { keywords: ['будапешт','budapest','bud'], code: 'BUD', name: 'Будапешт', country: 'Венгрия', basePrice: 40, baseDuration: 100, airlines: ['Wizz Air','Ryanair'], visa: 'schengen' },
+  { keywords: ['ереван','yerevan','evn'], code: 'EVN', name: 'Ереван', country: 'Армения', basePrice: 100, baseDuration: 250, airlines: ['FlyOne','Wizz Air'], visa: 'no_visa_1year' },
+  { keywords: ['белград','belgrade','beg'], code: 'BEG', name: 'Белград', country: 'Сербия', basePrice: 65, baseDuration: 140, airlines: ['Air Serbia','Wizz Air'], visa: 'no_visa_30d' }
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════ */
+const state = {
+  userLocation: { name: 'Тун', lat: 46.76, lon: 7.63 },
+  radius: 300,
+  airportsInRadius: [],
+  selectedAirports: [],
+  departureMode: 'any',
+  searchCount: 0,
+  totalSaved: 0,
+  favorites: []
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function showToast(type, title, message) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  const icons = { success: '✅', warning: '⚠️', info: 'ℹ️' };
+  toast.innerHTML = `
+    <div class="toast-icon">${icons[type]}</div>
+    <div class="toast-content">
+      <div class="toast-title">${title}</div>
+      <div class="toast-message">${message}</div>
+    </div>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(400px)';
+    setTimeout(() => toast.remove(), 400);
+  }, 4000);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOCATION & RADIUS LOGIC
+   ═══════════════════════════════════════════════════════════════ */
+function calculateAirportsInRadius() {
+  const { lat, lon } = state.userLocation;
+  const radius = state.radius;
+  
+  state.airportsInRadius = AIRPORTS.map(apt => {
+    const distance = haversine(lat, lon, apt.lat, apt.lon);
+    const driveTime = Math.round(distance * 1.3 / 80 * 60); // rough estimate
+    return { ...apt, distance, driveTime };
+  }).filter(apt => apt.distance <= radius)
+    .sort((a,b) => a.distance - b.distance);
+  
+  state.selectedAirports = state.airportsInRadius.map(a => a.code);
+  renderAirportsChips();
+  updateMap();
+  document.getElementById('airportsCount').textContent = state.airportsInRadius.length;
+  document.getElementById('fromInput').value = state.userLocation.name;
+}
+
+function renderAirportsChips() {
+  const container = document.getElementById('airportsChips');
+  container.innerHTML = state.airportsInRadius.map(apt => `
+    <div class="airport-chip-new selected" data-code="${apt.code}">
+      <strong>${apt.code}</strong>
+      <span>${apt.name}</span>
+      <span class="airport-chip-distance">${Math.round(apt.distance)} km • ${Math.round(apt.driveTime)} мин</span>
+    </div>
+  `).join('');
+  
+  container.querySelectorAll('.airport-chip-new').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const code = chip.dataset.code;
+      chip.classList.toggle('selected');
+      if (chip.classList.contains('selected')) {
+        if (!state.selectedAirports.includes(code)) state.selectedAirports.push(code);
+      } else {
+        state.selectedAirports = state.selectedAirports.filter(c => c !== code);
+      }
+    });
+  });
+}
+
+function updateMap() {
+  const svg = document.getElementById('europeMap');
+  const { lat, lon } = state.userLocation;
+  
+  // Convert lat/lon to SVG coordinates (simplified Mercator)
+  const toSVG = (lat, lon) => ({
+    x: (lon + 10) * 15 + 100,
+    y: (60 - lat) * 12 + 50
+  });
+  
+  const userPos = toSVG(lat, lon);
+  
+  // Update user marker
+  document.getElementById('userMarker').setAttribute('transform', `translate(${userPos.x},${userPos.y})`);
+  
+  // Update radius circle (scale: ~15px per 100km roughly)
+  const radiusPx = state.radius / 100 * 15;
+  document.getElementById('radiusCircle').setAttribute('cx', userPos.x);
+  document.getElementById('radiusCircle').setAttribute('cy', userPos.y);
+  document.getElementById('radiusCircle').setAttribute('r', radiusPx);
+  
+  // Update airport markers
+  const markersGroup = document.getElementById('airportMarkers');
+  markersGroup.innerHTML = AIRPORTS.map(apt => {
+    const pos = toSVG(apt.lat, apt.lon);
+    const distance = haversine(lat, lon, apt.lat, apt.lon);
+    const inRadius = distance <= state.radius;
+    return `
+      <g class="airport-marker ${inRadius ? 'in-radius' : 'out-radius'}" 
+         transform="translate(${pos.x},${pos.y})" data-code="${apt.code}">
+        <circle r="${inRadius ? 8 : 5}" fill="${inRadius ? 'var(--success)' : 'var(--text-tertiary)'}" 
+                opacity="${inRadius ? 1 : 0.5}"/>
+        <text x="12" y="4" font-size="10" font-weight="600" 
+              fill="${inRadius ? 'var(--text-primary)' : 'var(--text-tertiary)'}">${apt.code}</text>
+      </g>
+    `;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   AUTOCOMPLETE
+   ═══════════════════════════════════════════════════════════════ */
+const toInput = document.getElementById('toInput');
+const autocompleteList = document.getElementById('autocompleteList');
+
+toInput.addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  if (q.length < 2) { autocompleteList.classList.remove('show'); return; }
+  
+  const matches = DESTINATIONS.filter(d =>
+    d.keywords.some(k => k.includes(q)) ||
+    d.name.toLowerCase().includes(q) ||
+    d.country.toLowerCase().includes(q)
+  ).slice(0, 8);
+  
+  if (!matches.length) { autocompleteList.classList.remove('show'); return; }
+  
+  autocompleteList.innerHTML = matches.map(d => `
+    <div class="autocomplete-item" data-code="${d.code}">
+      <div class="autocomplete-city">${d.name} (${d.code})</div>
+      <div class="autocomplete-info">${d.country} • от ${d.basePrice} CHF</div>
+    </div>
+  `).join('');
+  
+  autocompleteList.querySelectorAll('.autocomplete-item').forEach(item => {
+    item.addEventListener('mousedown', e => {
+      e.preventDefault();
+      const dest = DESTINATIONS.find(d => d.code === item.dataset.code);
+      toInput.value = dest.name;
+      autocompleteList.classList.remove('show');
+    });
+  });
+  
+  autocompleteList.classList.add('show');
+});
+
+toInput.addEventListener('blur', () => setTimeout(() => autocompleteList.classList.remove('show'), 200));
+
+/* ═══════════════════════════════════════════════════════════════
+   SEARCH LOGIC
+   ═══════════════════════════════════════════════════════════════ */
+function findDestination(q) {
+  if (!q) return null;
+  q = q.toLowerCase().trim();
+  return DESTINATIONS.find(d => d.code.toLowerCase() === q) ||
+         DESTINATIONS.find(d => d.name.toLowerCase() === q) ||
+         DESTINATIONS.find(d => d.keywords.some(k => k === q)) ||
+         DESTINATIONS.find(d => d.keywords.some(k => k.includes(q) || q.includes(k))) ||
+         DESTINATIONS.find(d => d.name.toLowerCase().includes(q));
+}
+
+function generateFlightTime(mode, seed) {
+  let min, max;
+  switch(mode) {
+    case 'morning': min = 300; max = 720; break;
+    case 'day': min = 720; max = 1320; break;
+    case 'evening': min = 1320; max = 1440; break;
+    default: min = 300; max = 1320;
+  }
+  const v = Math.sin(seed * 7) * 0.5 + 0.5;
+  let m = min + Math.round(v * (max - min));
+  if (m < 0) m += 1440;
+  if (m >= 1440) m -= 1440;
+  return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+}
+
+function generateDuration(base, seed) {
+  const t = base + Math.round(Math.sin(seed * 2) * 30);
+  return `${Math.floor(t/60)}ч ${t%60}мин`;
+}
+
+function calcArrival(dep, dur) {
+  const [h,m] = dep.split(':').map(Number);
+  const match = dur.match(/(\d+)ч\s*(\d+)мин/);
+  let ah = h + parseInt(match[1]);
+  let am = m + parseInt(match[2]);
+  if (am >= 60) { ah++; am -= 60; }
+  if (ah >= 24) ah -= 24;
+  return `${String(ah).padStart(2,'0')}:${String(am).padStart(2,'0')}`;
+}
+
+function searchFlights() {
+  const destQ = toInput.value;
+  const dest = findDestination(destQ);
+  
+  if (!dest) {
+    showToast('warning', '⚠️ ' + (currentLang === 'ru' ? 'Направление не найдено' : 'Destination not found'), destQ);
+    return;
+  }
+  
+  if (state.selectedAirports.length === 0) {
+    showToast('warning', '⚠️ ' + (currentLang === 'ru' ? 'Выберите аэропорты' : 'Select airports'), '');
+    return;
+  }
+  
+  state.searchCount++;
+  localStorage.setItem('skyhunter_searches', state.searchCount);
+  document.getElementById('statSearches').textContent = state.searchCount;
+  
+  showToast('info', '🔍 ' + translations[currentLang].toastSearchStarted, `${dest.name} • ${state.selectedAirports.length} аэропортов`);
+  
+  const modeMod = state.departureMode === 'morning' ? 0.95 : state.departureMode === 'evening' ? 0.88 : 1.0;
+  
+  let flights = [];
+  state.selectedAirports.forEach((code, idx) => {
+    const apt = AIRPORTS.find(a => a.code === code);
+    const airline = dest.airlines[idx % dest.airlines.length];
+    const isLowcost = ['Ryanair','EasyJet','Wizz Air','Pegasus'].includes(airline);
+    const basePrice = Math.round(dest.basePrice * modeMod * (1 + idx * 0.05));
+    const seed = idx * 137 + code.charCodeAt(0);
+    
+    const depTime = generateFlightTime(state.departureMode, seed);
+    const duration = generateDuration(dest.baseDuration, seed);
+    const arrTime = calcArrival(depTime, duration);
+    
+    const hacks = [];
+    if (isLowcost) hacks.push('lowcost');
+    if (idx === 0 && dest.basePrice < 50) hacks.push('mistake');
+    
+    flights.push({
+      from: code, fromName: apt.name,
+      to: dest.code, toName: dest.name,
+      airline, flight: `${airline.substring(0,2).toUpperCase()}${1000+idx*137}`,
+      price: basePrice, pricePerPerson: Math.round(basePrice / 4),
+      depTime, arrTime, duration,
+      stops: 'Прямой', hacks, visa: dest.visa,
+      parking: apt.parking, drive: apt.drive
+    });
+  });
+  
+  flights.sort((a,b) => a.price - b.price);
+  renderResults(flights, dest);
+  renderCalendar(dest);
+  document.getElementById('calendarSection').style.display = 'block';
+}
+
+function renderResults(flights, dest) {
+  const list = document.getElementById('resultsList');
+  document.getElementById('resultsCount').textContent = flights.length;
+  
+  if (!flights.length) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">😕</div>
+      <div class="empty-state-title">${currentLang === 'ru' ? 'Ничего не найдено' : 'Nothing found'}</div>
+    </div>`;
+    return;
+  }
+  
+  list.innerHTML = flights.map((f, idx) => {
+    const isCheapest = idx === 0;
+    const modeEmoji = state.departureMode === 'morning' ? '🌅' : state.departureMode === 'day' ? '☀️' : state.departureMode === 'evening' ? '🌙' : '🎯';
+    const visaText = f.visa === 'schengen' ? '✓ Шенген' : f.visa === 'no_visa' ? '✓ Без визы' : f.visa === 'no_visa_1year' ? '✓ 1 год' : '⚠️ Виза';
+    
+    return `
+      <div class="flight-card ${isCheapest ? 'cheapest' : ''}">
+        ${isCheapest ? `<div class="flight-card.cheapest-badge">${translations[currentLang].cheapest}</div>` : ''}
+        <div class="flight-card-top">
+          <div class="flight-route-info">
+            <div class="flight-airline">
+              <div class="flight-airline-logo">✈️</div>
+              <span>${f.airline}</span>
+              <span style="opacity:0.5">•</span>
+              <span style="font-family:var(--font-mono);font-size:11px;">${f.flight}</span>
+            </div>
+            <div class="flight-route">${f.fromName} → ${f.toName}</div>
+            <div class="flight-meta">
+              <span>🅿️ ${f.parking} CHF/нед</span>
+              <span>🚗 ${Math.round(f.drive/60)}ч ${f.drive%60}мин</span>
+            </div>
+          </div>
+          <div class="flight-price-block">
+            <div class="flight-price">~${f.price} CHF</div>
+            <div class="flight-price-per">~${f.pricePerPerson} CHF / чел</div>
+          </div>
+        </div>
+        <div class="flight-time-block">
+          <div class="time-point">
+            <div class="time-value">${f.depTime}</div>
+            <div class="time-label">${translations[currentLang].departure}</div>
+            <div class="time-airport">${f.from}</div>
+          </div>
+          <div class="time-arrow">
+            <div class="time-duration">⏱️ ${f.duration}</div>
+            <div class="time-line"></div>
+            <div class="time-stops">${f.stops}</div>
+          </div>
+          <div class="time-point">
+            <div class="time-value">${f.arrTime}</div>
+            <div class="time-label">${translations[currentLang].arrival}</div>
+            <div class="time-airport">${f.to}</div>
+          </div>
+        </div>
+        <div class="flight-tags">
+          ${f.hacks.includes('lowcost') ? '<span class="tag tag-lowcost">💸 LOWCOST</span>' : ''}
+          ${f.hacks.includes('mistake') ? '<span class="tag tag-mistake">🔥 MISTAKE FARE</span>' : ''}
+          <span class="tag tag-visa">${visaText}</span>
+          <span class="tag tag-mode">${modeEmoji} ${state.departureMode}</span>
+        </div>
+        <div class="flight-actions">
+          <button class="action-btn primary" onclick="showToast('info','🔗','Переход на сайт авиакомпании')">
+            ${translations[currentLang].book}
+          </button>
+          <button class="action-btn" onclick="toggleFavorite('${f.flight}')">
+            ❤️ ${translations[currentLang].favorite}
+          </button>
+          <button class="action-btn" onclick="shareFlight('${f.from}','${f.to}','${f.price}')">
+            📤 ${translations[currentLang].share}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderCalendar(dest) {
+  const grid = document.getElementById('calendarGrid');
+  const today = new Date();
+  const days = [];
+  
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    const price = Math.round(dest.basePrice * (0.7 + Math.sin(i * 0.5) * 0.3 + Math.random() * 0.3));
+    days.push({ date: d, price });
+  }
+  
+  const prices = days.map(d => d.price);
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const range = max - min || 1;
+  const dayNames = currentLang === 'de' ? ['So','Mo','Di','Mi','Do','Fr','Sa'] :
+                   currentLang === 'en' ? ['Su','Mo','Tu','We','Th','Fr','Sa'] :
+                   ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  
+  grid.innerHTML = days.map((d, i) => {
+    const heatLevel = Math.ceil((d.price - min) / range * 5);
+    const isBest = d.price === min;
+    return `
+      <div class="calendar-day heat-${heatLevel} ${isBest ? 'best' : ''}">
+        <div class="calendar-day-name">${dayNames[d.date.getDay()]}</div>
+        <div class="calendar-day-num">${d.date.getDate()}</div>
+        <div class="calendar-day-price">${d.price} CHF</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleFavorite(flight) {
+  showToast('success', '❤️ ' + translations[currentLang].toastAddedToFav, flight);
+}
+
+function shareFlight(from, to, price) {
+  if (navigator.share) {
+    navigator.share({
+      title: 'SkyHunter AI — дешёвый рейс!',
+      text: `Нашёл рейс ${from} → ${to} за ${price} CHF на SkyHunter AI!`,
+      url: window.location.href
+    });
+  } else {
+    navigator.clipboard.writeText(`${from} → ${to} за ${price} CHF — SkyHunter AI`);
+    showToast('success', '📋', 'Скопировано в буфер обмена');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EVENT LISTENERS
+   ═══════════════════════════════════════════════════════════════ */
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeIcon').textContent = next === 'light' ? '🌙' : '☀️';
+  localStorage.setItem('skyhunter_theme', next);
+});
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyLanguage(btn.dataset.lang));
+});
+
+document.querySelectorAll('.mode-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.mode-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    state.departureMode = pill.dataset.mode;
+  });
+});
+
+document.getElementById('radiusSlider').addEventListener('input', e => {
+  document.getElementById('radiusValue').textContent = e.target.value;
+});
+
+document.getElementById('applyRadiusBtn').addEventListener('click', () => {
+  state.radius = parseInt(document.getElementById('radiusSlider').value);
+  calculateAirportsInRadius();
+  showToast('success', 
+    '📍 ' + translations[currentLang].toastLocationSet,
+    `${state.airportsInRadius.length} ${translations[currentLang].toastAirportsFound}`
+  );
+});
+
+document.getElementById('geoBtn').addEventListener('click', () => {
+  const btn = document.getElementById('geoBtn');
+  btn.classList.add('loading');
+  btn.textContent = '⏳';
+  
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        state.userLocation = { 
+          name: 'My Location', 
+          lat: pos.coords.latitude, 
+          lon: pos.coords.longitude 
+        };
+        document.getElementById('userLocation').value = `${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`;
+        calculateAirportsInRadius();
+        btn.classList.remove('loading');
+        btn.textContent = '📍';
+        showToast('success', '📍 ' + translations[currentLang].toastLocationSet, '');
+      },
+      err => {
+        btn.classList.remove('loading');
+        btn.textContent = '📍';
+        showToast('warning', '⚠️', 'Geolocation denied');
+      }
+    );
+  }
+});
+
+document.getElementById('searchBtn').addEventListener('click', searchFlights);
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    toInput.focus();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+    e.preventDefault();
+    document.getElementById('themeToggle').click();
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════════ */
+function init() {
+  // Load theme
+  const savedTheme = localStorage.getItem('skyhunter_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  document.getElementById('themeIcon').textContent = savedTheme === 'light' ? '🌙' : '☀️';
+  
+  // Load language
+  const savedLang = localStorage.getItem('skyhunter_lang') || 'ru';
+  applyLanguage(savedLang);
+  
+  // Load stats
+  state.searchCount = parseInt(localStorage.getItem('skyhunter_searches') || '0');
+  document.getElementById('statSearches').textContent = state.searchCount;
+  
+  // Set default dates
+  const today = new Date();
+  const in7 = new Date(today); in7.setDate(in7.getDate() + 30);
+  const in14 = new Date(today); in14.setDate(in14.getDate() + 37);
+  document.getElementById('dateOut').value = in7.toISOString().split('T')[0];
+  document.getElementById('dateBack').value = in14.toISOString().split('T')[0];
+  
+  // Calculate initial airports
+  calculateAirportsInRadius();
+  
+  // Welcome toast
+  setTimeout(() => {
+    showToast('info', '🦅 SkyHunter AI v9.0', 
+      currentLang === 'ru' ? 'Добро пожаловать! Нажмите Ctrl+K для быстрого поиска' :
+      currentLang === 'en' ? 'Welcome! Press Ctrl+K for quick search' :
+      'Willkommen! Drücken Sie Ctrl+K für Schnellsuche');
+  }, 1000);
+}
+
+init();
+</script>
+</body>
+</html>
