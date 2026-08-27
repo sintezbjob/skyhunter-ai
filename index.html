@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SkyHunter AI v9.5</title>
+<title>SkyHunter AI v9.4.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -118,7 +118,7 @@ body{font-family:var(--font-sans);background:var(--bg-primary);color:var(--text-
 .flight-card:hover::before{opacity:1}
 .flight-card.cheapest{border-color:var(--success)}
 .flight-card.cheapest::before{background:var(--success);opacity:1}
-.cheapest-badge{position:absolute;top:10px;left:60px;padding:3px 8px;background:var(--success);color:white;border-radius:var(--radius-full);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;z-index:2;box-shadow:0 2px 6px rgba(16,185,129,.3)}
+.cheapest-badge{position:absolute;top:10px;left:130px;padding:3px 8px;background:var(--success);color:white;border-radius:var(--radius-full);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;z-index:2;box-shadow:0 2px 6px rgba(16,185,129,.3)}
 .flight-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
 .flight-route-info{flex:1;min-width:0}
 .flight-airline{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);margin-bottom:2px}
@@ -223,7 +223,7 @@ body{font-family:var(--font-sans);background:var(--bg-primary);color:var(--text-
       <a href="#" class="logo">
         <div class="logo-icon">🦅</div>
         <span class="logo-text">SkyHunter AI</span>
-        <span class="logo-version">v9.5</span>
+        <span class="logo-version">v9.4.1</span>
       </a>
       <div class="header-actions">
         <div class="lang-switcher">
@@ -430,7 +430,7 @@ body{font-family:var(--font-sans);background:var(--bg-primary);color:var(--text-
 </section>
 <footer class="footer">
   <div class="container">
-    <p>SkyHunter AI v9.5 • <span data-i18n="footerMade">Сделано с</span> ❤️ <span data-i18n="footerFor">для путешественников</span></p>
+    <p>SkyHunter AI v9.4.1 • <span data-i18n="footerMade">Сделано с</span> ❤️ <span data-i18n="footerFor">для путешественников</span></p>
     <p style="margin-top:4px;font-size:10px">
       <span data-i18n="footerDisclaimer">Информация о ценах, визах и рейсах может меняться. Проверяйте на официальных сайтах.</span>
     </p>
@@ -485,7 +485,7 @@ document.querySelectorAll('.lang-btn').forEach(btn=>{btn.addEventListener('click
 document.querySelectorAll('.mode-pill').forEach(pill=>{pill.addEventListener('click',()=>{document.querySelectorAll('.mode-pill').forEach(p=>p.classList.remove('active'));pill.classList.add('active');state.departureMode=pill.dataset.mode})});
 document.getElementById('searchBtn').addEventListener('click',searchFlights);
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();toInput.focus()}if((e.ctrlKey||e.metaKey)&&e.key==='d'){e.preventDefault();document.getElementById('themeToggle').click()}});
-function init(){const savedTheme=localStorage.getItem('skyhunter_theme')||'light';document.documentElement.setAttribute('data-theme',savedTheme);document.getElementById('themeIcon').textContent=savedTheme==='light'?'🌙':'☀️';const savedLang=localStorage.getItem('skyhunter_lang')||'ru';applyLanguage(savedLang);state.searchCount=parseInt(localStorage.getItem('skyhunter_searches')||'0');const today=new Date();const in30=new Date(today);in30.setDate(in30.getDate()+30);const in37=new Date(today);in37.setDate(in37.getDate()+37);document.getElementById('dateOut').value=in30.toISOString().split('T')[0];document.getElementById('dateBack').value=in37.toISOString().split('T')[0];renderAirports();setTimeout(()=>{showToast('info','🦅 SkyHunter AI v9.5',currentLang==='ru'?'Ctrl+K — поиск, Ctrl+D — тема':currentLang==='en'?'Ctrl+K — search, Ctrl+D — theme':'Ctrl+K — Suche, Ctrl+D — Thema')},800)}
+function init(){const savedTheme=localStorage.getItem('skyhunter_theme')||'light';document.documentElement.setAttribute('data-theme',savedTheme);document.getElementById('themeIcon').textContent=savedTheme==='light'?'🌙':'☀️';const savedLang=localStorage.getItem('skyhunter_lang')||'ru';applyLanguage(savedLang);state.searchCount=parseInt(localStorage.getItem('skyhunter_searches')||'0');const today=new Date();const in30=new Date(today);in30.setDate(in30.getDate()+30);const in37=new Date(today);in37.setDate(in37.getDate()+37);document.getElementById('dateOut').value=in30.toISOString().split('T')[0];document.getElementById('dateBack').value=in37.toISOString().split('T')[0];renderAirports();setTimeout(()=>{showToast('info','🦅 SkyHunter AI v9.4.1',currentLang==='ru'?'Ctrl+K — поиск, Ctrl+D — тема':currentLang==='en'?'Ctrl+K — search, Ctrl+D — theme':'Ctrl+K — Suche, Ctrl+D — Thema')},800)}
 init();
 </script>
 </body>
