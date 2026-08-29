@@ -1,0 +1,37 @@
+{
+  "countries": {
+    "Georgia": ["TBS"],
+    "Turkey": ["IST", "SAW", "AYT"],
+    "Poland": ["WAW", "KRK", "GDN"],
+    "Italy": ["MXP", "BGY", "FCO", "VCE"],
+    "Spain": ["BCN", "MAD", "AGP"],
+    "Hungary": ["BUD"],
+    "Greece": ["ATH"],
+    "Portugal": ["LIS"],
+    "Czechia": ["PRG"],
+    "Austria": ["VIE"],
+    "Croatia": ["ZAG"],
+    "Ukraine": ["KBP", "ODS"],
+    "Japan": ["NRT", "HND", "KIX"],
+    "Thailand": ["BKK", "HKT"],
+    "Vietnam": ["SGN", "HAN"],
+    "India": ["DEL", "BOM"],
+    "UAE": ["DXB", "AUH"],
+    "Sri Lanka": ["CMB"],
+    "Maldives": ["MLE"],
+    "Egypt": ["CAI", "HRG", "SSH"],
+    "Morocco": ["CMN", "RAK"],
+    "South Africa": ["CPT", "JNB"],
+    "Kenya": ["NBO"],
+    "Tunisia": ["TUN"]
+  },
+  "departure_airports": {
+    "ZRH": {"name": "Zürich", "time_from_thun": "1h 15min", "parking": 180},
+    "BSL": {"name": "Basel", "time_from_thun": "1h 15min", "parking": 110},
+    "GVA": {"name": "Geneva", "time_from_thun": "2h 30min", "parking": 130},
+    "FKB": {"name": "Karlsruhe", "time_from_thun": "2h", "parking": 70},
+    "STR": {"name": "Stuttgart", "time_from_thun": "2h 30min", "parking": 80},
+    "MXP": {"name": "Milan Malpensa", "time_from_thun": "3h", "parking": 70},
+    "BGY": {"name": "Bergamo", "time_from_thun": "3h 30min", "parking": 65}
+  }
+}
