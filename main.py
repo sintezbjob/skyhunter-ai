@@ -3,35 +3,70 @@ import requests
 import json
 import os
 from datetime import datetime
+import random
 
-# Ищем index.html: сначала в папке public, потом в корне
+# Определяем папку для статических файлов
 if os.path.exists('public/index.html'):
     app = Flask(__name__, static_folder='public', static_url_path='')
 else:
     app = Flask(__name__, static_folder='.', static_url_path='')
 
-# Безопасная загрузка routes.json (не упадет, если файла нет)
+# Безопасная загрузка routes.json
 ROUTES_CONFIG = {}
 try:
     with open('routes.json', 'r', encoding='utf-8') as f:
         ROUTES_CONFIG = json.load(f)
 except FileNotFoundError:
     ROUTES_CONFIG = {
-        "countries": {"Georgia": ["TBS"], "Turkey": ["IST", "SAW"]},
-        "departure_airports": {"ZRH": {"name": "Zürich"}, "BSL": {"name": "Basel"}, "GVA": {"name": "Geneva"}}
+        "countries": {
+            "Georgia": ["TBS"],
+            "Turkey": ["IST", "SAW", "AYT"],
+            "Poland": ["WAW", "KRK", "GDN"],
+            "Italy": ["MXP", "BGY", "FCO", "VCE"],
+            "Spain": ["BCN", "MAD", "AGP"],
+            "Hungary": ["BUD"],
+            "Greece": ["ATH"],
+            "Portugal": ["LIS"],
+            "Czechia": ["PRG"],
+            "Austria": ["VIE"],
+            "Croatia": ["ZAG"],
+            "Ukraine": ["KBP", "ODS"],
+            "Japan": ["NRT", "HND", "KIX"],
+            "Thailand": ["BKK", "HKT"],
+            "Vietnam": ["SGN", "HAN"],
+            "India": ["DEL", "BOM"],
+            "UAE": ["DXB", "AUH"],
+            "Sri Lanka": ["CMB"],
+            "Maldives": ["MLE"],
+            "Egypt": ["CAI", "HRG", "SSH"],
+            "Morocco": ["CMN", "RAK"],
+            "South Africa": ["CPT", "JNB"],
+            "Kenya": ["NBO"],
+            "Tunisia": ["TUN"]
+        },
+        "departure_airports": {
+            "ZRH": {"name": "Zürich", "time_from_thun": "1h 15min", "parking": 180},
+            "BSL": {"name": "Basel", "time_from_thun": "1h 15min", "parking": 110},
+            "GVA": {"name": "Geneva", "time_from_thun": "2h 30min", "parking": 130},
+            "FKB": {"name": "Karlsruhe", "time_from_thun": "2h", "parking": 70},
+            "STR": {"name": "Stuttgart", "time_from_thun": "2h 30min", "parking": 80},
+            "MXP": {"name": "Milan Malpensa", "time_from_thun": "3h", "parking": 70},
+            "BGY": {"name": "Bergamo", "time_from_thun": "3h 30min", "parking": 65}
+        }
     }
 
 KIWI_API_KEY = os.getenv('KIWI_API_KEY', None)
 KIWI_BASE_URL = "https://tequila-api.kiwi.com/v2/search"
 
 def get_mock_prices(from_code, to_code, adults, children, infants):
-    import random
     distance_multipliers = {
         ('ZRH', 'TBS'): 1.8, ('BSL', 'TBS'): 1.8, ('GVA', 'TBS'): 1.9,
         ('ZRH', 'IST'): 1.2, ('ZRH', 'WAW'): 0.8, ('ZRH', 'BCN'): 0.9,
+        ('ZRH', 'NRT'): 3.5, ('ZRH', 'BKK'): 3.2, ('ZRH', 'DXB'): 2.5,
+        ('ZRH', 'CAI'): 2.0, ('ZRH', 'CPT'): 3.8,
     }
-    base_price = 150 # Реалистичная базовая цена
-    multiplier = distance_multipliers.get((from_code, to_code), 1.5)
+    base_price = 150
+    multiplier = distance_multipliers.get((from_code, to_code), 2.0)
     variation = random.uniform(0.9, 1.3)
     
     adult_price = int(base_price * multiplier * variation)
@@ -43,16 +78,15 @@ def get_mock_prices(from_code, to_code, adults, children, infants):
 
 def search_kiwi(from_code, to_code, date_from, date_to, adults, children, infants):
     if not KIWI_API_KEY:
-        import random
         prices = get_mock_prices(from_code, to_code, adults, children, infants)
         mock_flights = [
             {
                 'id': f'flight_{i}',
                 'price': prices['total'] + random.randint(-20, 50),
-                'airline': random.choice(['Wizz Air', 'Ryanair', 'EasyJet', 'SWISS', 'Pegasus', 'Georgian Airways']),
+                'airline': random.choice(['Wizz Air', 'Ryanair', 'EasyJet', 'SWISS', 'Pegasus', 'Georgian Airways', 'Emirates', 'Thai Airways']),
                 'departure': f'{date_from}T08:00:00',
                 'arrival': f'{date_from}T13:30:00',
-                'duration': random.randint(14400, 18000), # 4-5 часов в секундах
+                'duration': random.randint(14400, 18000),
                 'fly_from': from_code,
                 'fly_to': to_code,
                 'deep_link': f'https://www.kiwi.com/search/results/{from_code}/{to_code}/{date_from}',
@@ -160,3 +194,9 @@ def status():
         'mode': 'REAL' if KIWI_API_KEY else 'MOCK',
         'timestamp': datetime.now().isoformat()
     })
+
+# ВАЖНО: Этот блок нужен для запуска приложения!
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 8080))
+    print(f"Starting server on port {port}")
+    app.run(host='0.0.0.0', port=port, debug=False)
