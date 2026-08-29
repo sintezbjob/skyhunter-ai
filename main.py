@@ -1,42 +1,147 @@
 from flask import Flask, jsonify, request, send_from_directory
+import requests
 import json
 import os
 from datetime import datetime
-import random
 
-app = Flask(__name__, static_folder='.', static_url_path='')
+app = Flask(__name__, static_folder='public', static_url_path='')
 
-# Загрузи маршруты из routes.json (если есть)
-ROUTES_CONFIG = {
-    "countries": {
-        "Turkey": ["IST", "SAW"],
-        "Poland": ["WAW", "KRK"],
-        "Italy": ["MXP", "BGY", "FCO"],
-        "Spain": ["BCN", "MAD"],
-        "Hungary": ["BUD"],
-        "Greece": ["ATH"],
-        "Portugal": ["LIS"],
-        "Czechia": ["PRG"],
-        "Austria": ["VIE"],
-        "Croatia": ["ZAG"],
-        "Georgia": ["TBS"],
-        "Ukraine": ["KBP", "ODS"]
-    },
-    "departure_airports": {
-        "ZRH": {"name": "Zürich", "time_from_thun": "1h 15min"},
-        "BSL": {"name": "Basel", "time_from_thun": "1h 15min"},
-        "GVA": {"name": "Geneva", "time_from_thun": "2h 30min"},
-        "FKB": {"name": "Karlsruhe", "time_from_thun": "2h"},
-        "STR": {"name": "Stuttgart", "time_from_thun": "2h 30min"},
-        "MUC": {"name": "Munich", "time_from_thun": "4h"},
-        "MXP": {"name": "Milan", "time_from_thun": "3h"},
-        "BGY": {"name": "Bergamo", "time_from_thun": "3h 30min"}
+# Загрузи маршруты
+with open('routes.json', 'r', encoding='utf-8') as f:
+    ROUTES_CONFIG = json.load(f)
+
+KIWI_API_KEY = os.getenv('KIWI_API_KEY', None)
+KIWI_BASE_URL = "https://tequila-api.kiwi.com/v2/search"
+
+def get_mock_prices(from_code, to_code, adults, children, infants):
+    import random
+    
+    distance_multipliers = {
+        ('ZRH', 'IST'): 1.2,
+        ('ZRH', 'WAW'): 0.8,
+        ('ZRH', 'BCN'): 0.9,
+        ('ZRH', 'FCO'): 1.0,
+        ('ZRH', 'BUD'): 0.7,
+        ('ZRH', 'TBS'): 1.5,
     }
-}
+    
+    base_price = 120
+    multiplier = distance_multipliers.get((from_code, to_code), 1.0)
+    variation = random.uniform(0.8, 1.2)
+    
+    adult_price = int(base_price * multiplier * variation)
+    child_price = int(adult_price * 0.6)
+    infant_price = int(adult_price * 0.1)
+    
+    total_price = (adult_price * adults) + (child_price * children) + (infant_price * infants)
+    
+    return {
+        'adult': adult_price,
+        'child': child_price,
+        'infant': infant_price,
+        'total': total_price
+    }
+
+def search_kiwi(from_code, to_code, date_from, date_to, adults, children, infants):
+    
+    if not KIWI_API_KEY:
+        import random
+        
+        prices = get_mock_prices(from_code, to_code, adults, children, infants)
+        
+        mock_flights = [
+            {
+                'id': f'flight_{i}',
+                'price': prices['total'] + random.randint(-50, 100),
+                'airline': random.choice(['Wizz Air', 'Ryanair', 'EasyJet', 'SWISS', 'Lufthansa', 'Pegasus']),
+                'departure': '2026-09-15T08:00:00',
+                'arrival': '2026-09-15T11:30:00',
+                'duration': random.randint(3600, 7200),
+                'fly_from': from_code,
+                'fly_to': to_code,
+                'deep_link': f'https://www.kiwi.com/search/results/{from_code}/{to_code}/2026-09-15',
+                'transfers': random.randint(0, 1),
+                'local_departure': '2026-09-15T08:00:00',
+                'local_arrival': '2026-09-15T11:30:00'
+            }
+            for i in range(3)
+        ]
+        
+        return {
+            'data': sorted(mock_flights, key=lambda x: x['price']),
+            'currency': 'CHF',
+            'mock': True
+        }
+    
+    else:
+        params = {
+            'fly_from': from_code,
+            'fly_to': to_code,
+            'date_from': date_from,
+            'date_to': date_to,
+            'adults': adults,
+            'children': children,
+            'infants': infants,
+            'curr': 'CHF',
+            'apikey': KIWI_API_KEY,
+            'limit': 10
+        }
+        
+        try:
+            response = requests.get(KIWI_BASE_URL, params=params, timeout=10)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            return {
+                'data': [],
+                'error': str(e),
+                'currency': 'CHF'
+            }
+
+def format_time(seconds):
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    return f"{hours}h {minutes}m"
+
+def format_flights(flights_data, include_self_transfer=True):
+    
+    formatted = []
+    
+    if not flights_data.get('data'):
+        return []
+    
+    for flight in flights_data['data'][:20]:
+        
+        if flight.get('transfers', 0) > 0 and not include_self_transfer:
+            continue
+        
+        departure = flight.get('local_departure', flight.get('departure', ''))
+        arrival = flight.get('local_arrival', flight.get('arrival', ''))
+        
+        try:
+            dep_time = datetime.fromisoformat(departure.replace('Z', '+00:00')).strftime('%H:%M')
+            arr_time = datetime.fromisoformat(arrival.replace('Z', '+00:00')).strftime('%H:%M')
+        except:
+            dep_time = 'N/A'
+            arr_time = 'N/A'
+        
+        formatted.append({
+            'price': flight.get('price', 0),
+            'airline': flight.get('airlines', ['Unknown'])[0] if flight.get('airlines') else 'Unknown',
+            'departure_time': dep_time,
+            'arrival_time': arr_time,
+            'duration': format_time(flight.get('duration', 0)),
+            'transfers': flight.get('transfers', 0),
+            'route': f"{flight.get('fly_from', 'N/A')} → {flight.get('fly_to', 'N/A')}",
+            'link': flight.get('deep_link', '#'),
+            'date': departure[:10] if departure else 'N/A'
+        })
+    
+    return formatted
 
 @app.route('/')
 def index():
-    return send_from_directory('.', 'index.html')
+    return send_from_directory('public', 'index.html')
 
 @app.route('/api/routes', methods=['GET'])
 def get_routes():
@@ -44,43 +149,39 @@ def get_routes():
 
 @app.route('/api/search', methods=['POST'])
 def search():
+    
     data = request.json
+    
     from_code = data.get('from_code')
     to_country = data.get('to_country')
+    date_from = data.get('date_from')
+    date_to = data.get('date_to')
     adults = int(data.get('adults', 2))
     children = int(data.get('children', 0))
     infants = int(data.get('infants', 0))
+    include_self_transfer = data.get('include_self_transfer', True)
+    sort_by = data.get('sort_by', 'price')
     
     to_airports = ROUTES_CONFIG['countries'].get(to_country, [])
     if not to_airports:
         return jsonify({'error': 'Invalid destination', 'data': []}), 400
     
     results = []
-    for to_code in to_airports:
-        base_price = 120
-        adult_price = int(base_price * random.uniform(0.8, 1.5))
-        child_price = int(adult_price * 0.6)
-        infant_price = int(adult_price * 0.1)
-        total_price = (adult_price * adults) + (child_price * children) + (infant_price * infants)
-        
-        results.append({
-            'price': total_price,
-            'airline': random.choice(['Wizz Air', 'Ryanair', 'EasyJet', 'SWISS']),
-            'departure_time': '08:00',
-            'arrival_time': '11:30',
-            'duration': '3h 30m',
-            'transfers': random.randint(0, 1),
-            'route': f"{from_code} → {to_code}",
-            'link': f'https://www.kiwi.com/search/results/{from_code}/{to_code}',
-            'date': '2026-09-15'
-        })
     
-    results.sort(key=lambda x: x['price'])
+    for to_code in to_airports:
+        flights_data = search_kiwi(from_code, to_code, date_from, date_to, adults, children, infants)
+        formatted = format_flights(flights_data, include_self_transfer)
+        results.extend(formatted)
+    
+    if sort_by == 'price':
+        results = sorted(results, key=lambda x: x['price'])
+    elif sort_by == 'time':
+        results = sorted(results, key=lambda x: x['departure_time'])
     
     return jsonify({
         'flights': results,
         'total': len(results),
-        'mock_mode': True,
+        'mock_mode': not KIWI_API_KEY,
         'timestamp': datetime.now().isoformat()
     })
 
@@ -88,10 +189,10 @@ def search():
 def status():
     return jsonify({
         'status': 'ok',
-        'mode': 'MOCK',
+        'kiwi_connected': bool(KIWI_API_KEY),
+        'mode': 'REAL' if KIWI_API_KEY else 'MOCK',
         'timestamp': datetime.now().isoformat()
     })
 
-if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+# Gunicorn запустит это автоматически
+# НЕ добавляй if __name__ == '__main__' блок
